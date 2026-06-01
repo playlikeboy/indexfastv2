@@ -67,14 +67,14 @@ export function Features() {
 							key={f.title}
 							className="group bg-surface p-6 transition-colors hover:bg-accent"
 						>
-							<div className="mb-4 flex h-9 w-9 items-center justify-center border border-ink text-ink">
+							<div className="mb-4 flex h-9 w-9 items-center justify-center border border-ink text-ink group-hover:border-accent-foreground group-hover:text-accent-foreground">
 								<svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
 									<rect x="1" y="1" width="16" height="16" stroke="currentColor" strokeWidth="1.5" />
 									<path d="M5 9l3 3 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
 								</svg>
 							</div>
-							<h3 className="text-base font-bold">{f.title}</h3>
-							<p className="mt-2 text-sm leading-relaxed text-muted group-hover:text-ink/70">{f.desc}</p>
+							<h3 className="text-base font-bold group-hover:text-accent-foreground">{f.title}</h3>
+							<p className="mt-2 text-sm leading-relaxed text-muted group-hover:text-accent-foreground/70">{f.desc}</p>
 						</div>
 					))}
 				</div>

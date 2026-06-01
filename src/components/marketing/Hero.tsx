@@ -80,8 +80,8 @@ function DashboardMockup() {
 function StatCard({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
 	return (
 		<div className={`p-3 text-center ${accent ? "bg-accent" : "bg-card"}`}>
-			<p className="stat text-2xl text-ink">{value}</p>
-			<p className="mt-1 text-[11px] uppercase tracking-wide text-muted">{label}</p>
+			<p className={`stat text-2xl ${accent ? "text-accent-foreground" : "text-ink"}`}>{value}</p>
+			<p className={`mt-1 text-[11px] uppercase tracking-wide ${accent ? "text-accent-foreground/60" : "text-muted"}`}>{label}</p>
 		</div>
 	);
 }

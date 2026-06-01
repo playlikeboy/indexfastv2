@@ -32,9 +32,9 @@ export function FreeTools() {
 							href={`/tools/${t.slug}`}
 							className="group flex flex-col bg-surface p-5 transition-colors hover:bg-accent"
 						>
-							<h3 className="text-sm font-bold">{t.title}</h3>
-							<p className="mt-2 flex-1 text-xs leading-relaxed text-muted group-hover:text-ink/70">{t.desc}</p>
-							<span className="mt-4 inline-flex items-center text-xs font-bold uppercase tracking-wide text-ink">
+							<h3 className="text-sm font-bold group-hover:text-accent-foreground">{t.title}</h3>
+							<p className="mt-2 flex-1 text-xs leading-relaxed text-muted group-hover:text-accent-foreground/70">{t.desc}</p>
+							<span className="mt-4 inline-flex items-center text-xs font-bold uppercase tracking-wide text-ink group-hover:text-accent-foreground">
 								Use tool
 								<svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="ml-1.5 transition-transform group-hover:translate-x-1" aria-hidden="true">
 									<path d="M2 6h8M7 3l3 3-3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />

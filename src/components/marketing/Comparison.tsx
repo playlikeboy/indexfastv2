@@ -29,7 +29,7 @@ export function Comparison() {
 								<th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-muted">Feature</th>
 								<th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wide text-muted">Manual GSC</th>
 								<th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wide text-muted">Grey Indexers</th>
-								<th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wide text-ink bg-accent">IndexFast</th>
+								<th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wide text-accent-foreground bg-accent">IndexFast</th>
 							</tr>
 						</thead>
 						<tbody>

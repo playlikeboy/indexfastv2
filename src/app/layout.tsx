@@ -12,7 +12,7 @@ const geistMono = Geist_Mono({
 	subsets: ["latin"],
 });
 
-const SITE_URL = "https://indexfast.io";
+const SITE_URL = "https://indexfast.co";
 
 export const metadata: Metadata = {
 	metadataBase: new URL(SITE_URL),
@@ -168,9 +168,14 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<html lang="en">
+		<html lang="en" suppressHydrationWarning>
 			<head>
 				<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+				<script
+					dangerouslySetInnerHTML={{
+						__html: `(function(){try{var t=localStorage.getItem('theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark')}}catch(e){}})();`,
+					}}
+				/>
 				<script
 					type="application/ld+json"
 					dangerouslySetInnerHTML={{

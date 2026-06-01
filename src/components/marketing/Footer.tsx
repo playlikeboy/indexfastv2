@@ -5,7 +5,7 @@ export function FinalCTA() {
 	return (
 		<section className="px-4 py-20 sm:px-6 sm:py-24" id="cta" aria-labelledby="cta-heading">
 			<div className="mx-auto max-w-5xl bg-ink px-6 py-16 text-surface sm:px-12 sm:py-20">
-				<p className="label-mono text-accent">Free indexing audit</p>
+				<p className="label-mono text-surface/60">Free indexing audit</p>
 				<h2 id="cta-heading" className="display mt-4 max-w-2xl text-4xl text-surface sm:text-5xl">
 					Find out which pages Google is{" "}
 					<span className="text-highlight">ignoring.</span>

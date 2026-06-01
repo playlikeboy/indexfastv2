@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ThemeToggle } from "./ThemeToggle";
 
 export function Logo({ className = "h-7 w-7" }: { className?: string }) {
 	return (
@@ -28,6 +29,7 @@ export function Navbar() {
 					<a href="#pricing" className="text-sm text-muted transition-colors hover:text-ink">Pricing</a>
 					<a href="/blog" className="text-sm text-muted transition-colors hover:text-ink">Blog</a>
 					<Link href="/login" className="text-sm text-muted transition-colors hover:text-ink">Login</Link>
+					<ThemeToggle />
 					<Link
 						href="#cta"
 						className="bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground transition-colors hover:bg-accent-dark"
@@ -35,7 +37,8 @@ export function Navbar() {
 						Run free audit
 					</Link>
 				</div>
-				<div className="md:hidden">
+				<div className="flex items-center gap-2 md:hidden">
+					<ThemeToggle />
 					<Link
 						href="#cta"
 						className="bg-accent px-3 py-1.5 text-sm font-semibold text-accent-foreground"

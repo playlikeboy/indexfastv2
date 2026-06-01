@@ -69,21 +69,21 @@ export function Pricing() {
 							}`}
 						>
 							{plan.highlight && (
-								<span className="label-mono mb-3 text-ink">Most popular</span>
+								<span className="label-mono mb-3 text-accent-foreground">Most popular</span>
 							)}
-							<h3 className="text-sm font-bold uppercase tracking-wide">{plan.name}</h3>
+							<h3 className={`text-sm font-bold uppercase tracking-wide ${plan.highlight ? "text-accent-foreground" : ""}`}>{plan.name}</h3>
 							<div className="mt-3 flex items-baseline gap-1">
-								<span className="stat text-4xl text-ink">{plan.price}</span>
-								{plan.period && <span className="text-sm text-muted">{plan.period}</span>}
+								<span className={`stat text-4xl ${plan.highlight ? "text-accent-foreground" : "text-ink"}`}>{plan.price}</span>
+								{plan.period && <span className={`text-sm ${plan.highlight ? "text-accent-foreground/60" : "text-muted"}`}>{plan.period}</span>}
 							</div>
-							<p className={`mt-2 text-xs ${plan.highlight ? "text-ink/70" : "text-muted"}`}>{plan.desc}</p>
+							<p className={`mt-2 text-xs ${plan.highlight ? "text-accent-foreground/70" : "text-muted"}`}>{plan.desc}</p>
 							<ul className="mt-5 flex-1 space-y-2.5">
 								{plan.features.map((f) => (
 									<li key={f} className="flex items-start gap-2 text-xs">
-										<svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="mt-0.5 shrink-0" aria-hidden="true">
+										<svg width="14" height="14" viewBox="0 0 14 14" fill="none" className={`mt-0.5 shrink-0 ${plan.highlight ? "text-accent-foreground" : "text-ink"}`} aria-hidden="true">
 											<path d="M3 7l3 3 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
 										</svg>
-										<span className={plan.highlight ? "text-ink/80" : "text-muted"}>{f}</span>
+										<span className={plan.highlight ? "text-accent-foreground/80" : "text-muted"}>{f}</span>
 									</li>
 								))}
 							</ul>
@@ -91,7 +91,7 @@ export function Pricing() {
 								href="#cta"
 								className={`mt-6 inline-flex items-center justify-center px-4 py-2.5 text-sm font-semibold transition-colors ${
 									plan.highlight
-										? "bg-ink text-surface hover:bg-ink/85"
+										? "bg-accent-foreground text-accent hover:opacity-85"
 										: "border border-ink text-ink hover:bg-ink hover:text-surface"
 								}`}
 							>
