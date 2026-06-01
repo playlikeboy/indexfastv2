@@ -5,17 +5,27 @@
 	--color-foreground: var(--foreground);
 	--font-sans: var(--font-geist-sans);
 	--font-mono: var(--font-geist-mono);
-	--color-accent: #0066ff;
-	--color-accent-dark: #0052cc;
-	--color-muted: #6b7280;
-	--color-border: #e5e7eb;
-	--color-card: #f9fafb;
-	--color-card-hover: #f3f4f6;
+
+	/* Acid-lime accent */
+	--color-accent: #ccff00;
+	--color-accent-dark: #b3e600;
+	--color-accent-foreground: #0a0a0a;
+
+	/* Ink + neutrals */
+	--color-ink: #0a0a0a;
+	--color-surface: #f2f1ec;
+	--color-card: #ecebe4;
+	--color-card-hover: #e4e3da;
+	--color-muted: #8a8a80;
+	--color-border: #d8d7cf;
+
+	/* Sharp brutalist edges */
+	--radius: 0px;
 }
 
 :root {
-	--background: #ffffff;
-	--foreground: #0f172a;
+	--background: #f2f1ec;
+	--foreground: #0a0a0a;
 }
 
 body {
@@ -30,18 +40,44 @@ html {
 	scroll-behavior: smooth;
 }
 
-/* Gradient text utility */
-.text-gradient {
-	background: linear-gradient(135deg, #0f172a 0%, #0066ff 100%);
-	-webkit-background-clip: text;
-	-webkit-text-fill-color: transparent;
-	background-clip: text;
+/* Tight display headings — heavy weight, negative tracking */
+.display {
+	font-weight: 800;
+	letter-spacing: -0.04em;
+	line-height: 0.92;
+	text-transform: uppercase;
 }
 
-/* Subtle grid background for hero */
+/* Oversized stat numbers */
+.stat {
+	font-weight: 800;
+	letter-spacing: -0.04em;
+	line-height: 0.9;
+	font-variant-numeric: tabular-nums;
+}
+
+/* Uppercase mono labels with wide tracking */
+.label-mono {
+	font-family: var(--font-geist-mono), ui-monospace, monospace;
+	text-transform: uppercase;
+	letter-spacing: 0.12em;
+	font-size: 0.8125rem;
+	color: var(--color-muted);
+}
+
+/* Lime highlight behind inline text (e.g. a single word) */
+.text-highlight {
+	background: var(--color-accent);
+	color: var(--color-accent-foreground);
+	padding: 0 0.15em;
+	box-decoration-break: clone;
+	-webkit-box-decoration-break: clone;
+}
+
+/* Faint grid background */
 .bg-grid {
 	background-image:
-		linear-gradient(rgba(0, 102, 255, 0.03) 1px, transparent 1px),
-		linear-gradient(90deg, rgba(0, 102, 255, 0.03) 1px, transparent 1px);
+		linear-gradient(rgba(10, 10, 10, 0.04) 1px, transparent 1px),
+		linear-gradient(90deg, rgba(10, 10, 10, 0.04) 1px, transparent 1px);
 	background-size: 64px 64px;
 }
