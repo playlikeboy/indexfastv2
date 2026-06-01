@@ -15,33 +15,32 @@ const tools = [
 
 export function FreeTools() {
 	return (
-		<section className="py-20 sm:py-24" id="tools" aria-labelledby="tools-heading">
+		<section className="bg-card py-20 sm:py-24" id="tools" aria-labelledby="tools-heading">
 			<div className="mx-auto max-w-6xl px-4 sm:px-6">
-				<h2 id="tools-heading" className="text-3xl font-bold tracking-tight sm:text-4xl text-center">
+				<p className="label-mono">Free tools</p>
+				<h2 id="tools-heading" className="display mt-3 max-w-2xl text-4xl sm:text-5xl">
 					Free SEO indexing tools to{" "}
-					<span className="text-gradient">get started.</span>
+					<span className="text-highlight">get started.</span>
 				</h2>
-				<p className="mt-4 text-center text-muted max-w-2xl mx-auto">
+				<p className="mt-5 max-w-2xl text-lg text-muted">
 					No signup required. Use these free tools to diagnose indexing issues right now.
 				</p>
-				<div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+				<div className="mt-12 grid gap-px bg-ink/10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 					{tools.map((t) => (
-						<div
+						<Link
 							key={t.slug}
-							className="flex flex-col rounded-xl border border-border bg-white p-4 transition-colors hover:border-accent/20 hover:shadow-sm"
+							href={`/tools/${t.slug}`}
+							className="group flex flex-col bg-surface p-5 transition-colors hover:bg-accent"
 						>
-							<h3 className="text-sm font-semibold">{t.title}</h3>
-							<p className="mt-1 flex-1 text-xs text-muted leading-relaxed">{t.desc}</p>
-							<Link
-								href={`/tools/${t.slug}`}
-								className="mt-3 inline-flex items-center text-xs font-medium text-accent transition-colors hover:text-accent-dark"
-							>
+							<h3 className="text-sm font-bold">{t.title}</h3>
+							<p className="mt-2 flex-1 text-xs leading-relaxed text-muted group-hover:text-ink/70">{t.desc}</p>
+							<span className="mt-4 inline-flex items-center text-xs font-bold uppercase tracking-wide text-ink">
 								Use tool
-								<svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="ml-1" aria-hidden="true">
+								<svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="ml-1.5 transition-transform group-hover:translate-x-1" aria-hidden="true">
 									<path d="M2 6h8M7 3l3 3-3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
 								</svg>
-							</Link>
-						</div>
+							</span>
+						</Link>
 					))}
 				</div>
 			</div>

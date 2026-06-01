@@ -12,23 +12,24 @@ export function UseCases() {
 	];
 
 	return (
-		<section className="py-20 sm:py-24 bg-card" aria-labelledby="usecases-heading">
+		<section className="py-20 sm:py-24" aria-labelledby="usecases-heading">
 			<div className="mx-auto max-w-6xl px-4 sm:px-6">
-				<h2 id="usecases-heading" className="text-3xl font-bold tracking-tight sm:text-4xl text-center">
+				<p className="label-mono">Use cases</p>
+				<h2 id="usecases-heading" className="display mt-3 max-w-2xl text-4xl sm:text-5xl">
 					Built for sites that{" "}
-					<span className="text-gradient">publish fast.</span>
+					<span className="text-highlight">publish fast.</span>
 				</h2>
-				<p className="mt-4 text-center text-muted max-w-2xl mx-auto">
+				<p className="mt-5 max-w-2xl text-lg text-muted">
 					Whether you publish 10 pages or 10,000, IndexFast keeps your indexing health in check.
 				</p>
-				<div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+				<div className="mt-12 grid gap-px bg-ink/10 sm:grid-cols-2 lg:grid-cols-3">
 					{cases.map((c) => (
 						<div
 							key={c.title}
-							className="rounded-xl border border-border bg-white p-5 transition-colors hover:border-accent/20"
+							className="bg-surface p-6 transition-colors hover:bg-card"
 						>
-							<h3 className="text-sm font-semibold">{c.title}</h3>
-							<p className="mt-1.5 text-sm text-muted">{c.desc}</p>
+							<h3 className="text-base font-bold">{c.title}</h3>
+							<p className="mt-2 text-sm text-muted">{c.desc}</p>
 						</div>
 					))}
 				</div>

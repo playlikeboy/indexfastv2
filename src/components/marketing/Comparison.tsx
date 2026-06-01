@@ -12,32 +12,33 @@ export function Comparison() {
 	];
 
 	return (
-		<section className="py-20 sm:py-24 bg-card" aria-labelledby="comparison-heading">
+		<section className="py-20 sm:py-24" aria-labelledby="comparison-heading">
 			<div className="mx-auto max-w-6xl px-4 sm:px-6">
-				<h2 id="comparison-heading" className="text-3xl font-bold tracking-tight sm:text-4xl text-center">
+				<p className="label-mono">Comparison</p>
+				<h2 id="comparison-heading" className="display mt-3 max-w-3xl text-4xl sm:text-5xl">
 					Safer than black-hat indexers.{" "}
-					<span className="text-gradient">Faster than manual checking.</span>
+					<span className="text-highlight">Faster than manual checking.</span>
 				</h2>
-				<p className="mt-4 text-center text-muted max-w-2xl mx-auto">
+				<p className="mt-5 max-w-2xl text-lg text-muted">
 					See how IndexFast compares to manual workflows and grey-hat indexing services.
 				</p>
-				<div className="mt-12 overflow-x-auto">
+				<div className="mt-12 overflow-x-auto border border-ink">
 					<table className="w-full min-w-[600px] text-sm">
 						<thead>
-							<tr className="border-b border-border">
-								<th className="pb-3 text-left font-semibold text-muted">Feature</th>
-								<th className="pb-3 text-center font-semibold text-muted">Manual GSC</th>
-								<th className="pb-3 text-center font-semibold text-muted">Grey Indexers</th>
-								<th className="pb-3 text-center font-semibold text-accent">IndexFast</th>
+							<tr className="border-b border-ink bg-card">
+								<th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-muted">Feature</th>
+								<th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wide text-muted">Manual GSC</th>
+								<th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wide text-muted">Grey Indexers</th>
+								<th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wide text-ink bg-accent">IndexFast</th>
 							</tr>
 						</thead>
 						<tbody>
 							{rows.map((row) => (
-								<tr key={row.feature} className="border-b border-border/50">
-									<td className="py-3 font-medium">{row.feature}</td>
-									<td className="py-3 text-center text-muted">{row.manual}</td>
-									<td className="py-3 text-center text-muted">{row.grey}</td>
-									<td className="py-3 text-center font-medium text-accent">{row.indexfast}</td>
+								<tr key={row.feature} className="border-b border-ink/10 last:border-b-0">
+									<td className="px-4 py-3 font-semibold">{row.feature}</td>
+									<td className="px-4 py-3 text-center text-muted">{row.manual}</td>
+									<td className="px-4 py-3 text-center text-muted">{row.grey}</td>
+									<td className="px-4 py-3 text-center font-bold text-ink bg-accent/10">{row.indexfast}</td>
 								</tr>
 							))}
 						</tbody>

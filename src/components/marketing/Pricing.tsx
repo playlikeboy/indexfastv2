@@ -50,52 +50,49 @@ const plans = [
 
 export function Pricing() {
 	return (
-		<section className="py-20 sm:py-24" id="pricing" aria-labelledby="pricing-heading">
+		<section className="bg-card py-20 sm:py-24" id="pricing" aria-labelledby="pricing-heading">
 			<div className="mx-auto max-w-6xl px-4 sm:px-6">
-				<h2 id="pricing-heading" className="text-3xl font-bold tracking-tight sm:text-4xl text-center">
+				<p className="label-mono">Pricing</p>
+				<h2 id="pricing-heading" className="display mt-3 max-w-2xl text-4xl sm:text-5xl">
 					Simple pricing for{" "}
-					<span className="text-gradient">every scale.</span>
+					<span className="text-highlight">every scale.</span>
 				</h2>
-				<p className="mt-4 text-center text-muted max-w-2xl mx-auto">
+				<p className="mt-5 max-w-2xl text-lg text-muted">
 					Start free. Upgrade when you need more checks, sites, or team features.
 				</p>
-				<div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+				<div className="mt-12 grid gap-px bg-ink/15 sm:grid-cols-2 lg:grid-cols-5">
 					{plans.map((plan) => (
 						<div
 							key={plan.name}
-							className={`relative flex flex-col rounded-xl border p-5 transition-colors ${
-								plan.highlight
-									? "border-accent bg-white shadow-lg shadow-accent/10"
-									: "border-border bg-white hover:border-accent/20"
+							className={`relative flex flex-col p-6 ${
+								plan.highlight ? "bg-accent" : "bg-surface"
 							}`}
 						>
 							{plan.highlight && (
-								<span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-accent px-3 py-0.5 text-xs font-medium text-white">
-									Popular
-								</span>
+								<span className="label-mono mb-3 text-ink">Most popular</span>
 							)}
-							<h3 className="text-base font-semibold">{plan.name}</h3>
-							<div className="mt-2 flex items-baseline gap-1">
-								<span className="text-3xl font-bold">{plan.price}</span>
+							<h3 className="text-sm font-bold uppercase tracking-wide">{plan.name}</h3>
+							<div className="mt-3 flex items-baseline gap-1">
+								<span className="stat text-4xl text-ink">{plan.price}</span>
 								{plan.period && <span className="text-sm text-muted">{plan.period}</span>}
 							</div>
-							<p className="mt-1 text-xs text-muted">{plan.desc}</p>
-							<ul className="mt-4 flex-1 space-y-2">
+							<p className={`mt-2 text-xs ${plan.highlight ? "text-ink/70" : "text-muted"}`}>{plan.desc}</p>
+							<ul className="mt-5 flex-1 space-y-2.5">
 								{plan.features.map((f) => (
-									<li key={f} className="flex items-start gap-2 text-xs text-muted">
+									<li key={f} className="flex items-start gap-2 text-xs">
 										<svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="mt-0.5 shrink-0" aria-hidden="true">
-											<path d="M3 7l3 3 5-5" stroke="#0066ff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+											<path d="M3 7l3 3 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
 										</svg>
-										{f}
+										<span className={plan.highlight ? "text-ink/80" : "text-muted"}>{f}</span>
 									</li>
 								))}
 							</ul>
 							<Link
 								href="#cta"
-								className={`mt-5 inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+								className={`mt-6 inline-flex items-center justify-center px-4 py-2.5 text-sm font-semibold transition-colors ${
 									plan.highlight
-										? "bg-accent text-white hover:bg-accent-dark"
-										: "border border-border text-foreground hover:bg-card"
+										? "bg-ink text-surface hover:bg-ink/85"
+										: "border border-ink text-ink hover:bg-ink hover:text-surface"
 								}`}
 							>
 								{plan.cta}
@@ -103,9 +100,9 @@ export function Pricing() {
 						</div>
 					))}
 				</div>
-				<p className="mt-8 text-center text-sm text-muted">
+				<p className="mt-8 text-sm text-muted">
 					Need more checks?{" "}
-					<span className="font-medium text-foreground">Buy extra credits anytime.</span>{" "}
+					<span className="font-semibold text-ink">Buy extra credits anytime.</span>{" "}
 					No forced plan upgrades.
 				</p>
 			</div>

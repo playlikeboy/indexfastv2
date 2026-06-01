@@ -53,27 +53,28 @@ export function Features() {
 	return (
 		<section className="py-20 sm:py-24" id="features" aria-labelledby="features-heading">
 			<div className="mx-auto max-w-6xl px-4 sm:px-6">
-				<h2 id="features-heading" className="text-3xl font-bold tracking-tight sm:text-4xl text-center">
+				<p className="label-mono">Features</p>
+				<h2 id="features-heading" className="display mt-3 max-w-3xl text-4xl sm:text-5xl">
 					Everything you need to{" "}
-					<span className="text-gradient">diagnose and fix indexing.</span>
+					<span className="text-highlight">diagnose and fix indexing.</span>
 				</h2>
-				<p className="mt-4 text-center text-muted max-w-2xl mx-auto">
+				<p className="mt-5 max-w-2xl text-lg text-muted">
 					A complete toolkit for technical indexing health — from discovery to monitoring.
 				</p>
-				<div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+				<div className="mt-12 grid gap-px bg-ink/10 sm:grid-cols-2 lg:grid-cols-3">
 					{features.map((f) => (
 						<div
 							key={f.title}
-							className="group rounded-xl border border-border bg-white p-5 transition-all hover:border-accent/20 hover:shadow-md hover:shadow-accent/5"
+							className="group bg-surface p-6 transition-colors hover:bg-accent"
 						>
-							<div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-accent transition-colors group-hover:bg-accent group-hover:text-white">
+							<div className="mb-4 flex h-9 w-9 items-center justify-center border border-ink text-ink">
 								<svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-									<rect x="1" y="1" width="16" height="16" rx="3" stroke="currentColor" strokeWidth="1.5" />
+									<rect x="1" y="1" width="16" height="16" stroke="currentColor" strokeWidth="1.5" />
 									<path d="M5 9l3 3 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
 								</svg>
 							</div>
-							<h3 className="text-sm font-semibold">{f.title}</h3>
-							<p className="mt-1.5 text-sm text-muted leading-relaxed">{f.desc}</p>
+							<h3 className="text-base font-bold">{f.title}</h3>
+							<p className="mt-2 text-sm leading-relaxed text-muted group-hover:text-ink/70">{f.desc}</p>
 						</div>
 					))}
 				</div>

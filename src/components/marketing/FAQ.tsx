@@ -27,31 +27,33 @@ const faqs = [
 
 export function FAQ() {
 	return (
-		<section className="py-20 sm:py-24 bg-card" id="faq" aria-labelledby="faq-heading">
+		<section className="py-20 sm:py-24" id="faq" aria-labelledby="faq-heading">
 			<div className="mx-auto max-w-3xl px-4 sm:px-6">
-				<h2 id="faq-heading" className="text-3xl font-bold tracking-tight sm:text-4xl text-center">
-					Frequently asked questions
+				<p className="label-mono">FAQ</p>
+				<h2 id="faq-heading" className="display mt-3 text-4xl sm:text-5xl">
+					Frequently asked{" "}
+					<span className="text-highlight">questions.</span>
 				</h2>
-				<p className="mt-4 text-center text-muted">
+				<p className="mt-5 text-lg text-muted">
 					Honest answers about what IndexFast does and does not do.
 				</p>
-				<div className="mt-10 divide-y divide-border rounded-xl border border-border bg-white">
-					{faqs.map((faq) => (
-						<details key={faq.q} className="group">
-							<summary className="flex cursor-pointer items-center justify-between px-5 py-4 text-sm font-semibold transition-colors hover:text-accent [&::-webkit-details-marker]:hidden list-none">
+				<div className="mt-10 border border-ink">
+					{faqs.map((faq, i) => (
+						<details key={faq.q} className={`group ${i > 0 ? "border-t border-ink/15" : ""}`}>
+							<summary className="flex cursor-pointer items-center justify-between px-5 py-4 text-sm font-bold transition-colors hover:bg-card [&::-webkit-details-marker]:hidden list-none">
 								{faq.q}
 								<svg
 									width="16"
 									height="16"
 									viewBox="0 0 16 16"
 									fill="none"
-									className="ml-4 shrink-0 transition-transform group-open:rotate-180"
+									className="ml-4 shrink-0 transition-transform group-open:rotate-45"
 									aria-hidden="true"
 								>
-									<path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+									<path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
 								</svg>
 							</summary>
-							<div className="px-5 pb-4 text-sm text-muted leading-relaxed">{faq.a}</div>
+							<div className="px-5 pb-4 text-sm leading-relaxed text-muted">{faq.a}</div>
 						</details>
 					))}
 				</div>

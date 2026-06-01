@@ -29,27 +29,25 @@ export function Problem() {
 	return (
 		<section className="py-20 sm:py-24" aria-labelledby="problem-heading">
 			<div className="mx-auto max-w-6xl px-4 sm:px-6">
-				<h2 id="problem-heading" className="text-3xl font-bold tracking-tight sm:text-4xl text-center">
+				<p className="label-mono">The problem</p>
+				<h2 id="problem-heading" className="display mt-3 max-w-2xl text-4xl sm:text-5xl">
 					Your pages can be live but{" "}
-					<span className="text-gradient">invisible.</span>
+					<span className="text-highlight">invisible.</span>
 				</h2>
-				<p className="mt-4 text-center text-muted max-w-2xl mx-auto">
+				<p className="mt-5 max-w-2xl text-lg text-muted">
 					Publishing pages is easy. Getting them indexed and visible in search is the hard part.
 				</p>
-				<div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-					{problems.map((p) => (
+				<div className="mt-12 grid gap-px bg-ink/10 sm:grid-cols-2 lg:grid-cols-3">
+					{problems.map((p, i) => (
 						<div
 							key={p.title}
-							className="rounded-xl border border-border bg-card p-5 transition-colors hover:bg-card-hover"
+							className="group bg-surface p-6 transition-colors hover:bg-card"
 						>
-							<div className="mb-2 flex h-8 w-8 items-center justify-center rounded-lg bg-red-50">
-								<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-									<path d="M8 1L1 14h14L8 1z" stroke="#ef4444" strokeWidth="1.5" fill="none" />
-									<path d="M8 6v4M8 12h.01" stroke="#ef4444" strokeWidth="1.5" strokeLinecap="round" />
-								</svg>
-							</div>
-							<h3 className="text-sm font-semibold">{p.title}</h3>
-							<p className="mt-1 text-sm text-muted">{p.desc}</p>
+							<span className="label-mono block text-ink/40">
+								{String(i + 1).padStart(2, "0")}
+							</span>
+							<h3 className="mt-3 text-base font-bold">{p.title}</h3>
+							<p className="mt-2 text-sm leading-relaxed text-muted">{p.desc}</p>
 						</div>
 					))}
 				</div>

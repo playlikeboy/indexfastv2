@@ -4,13 +4,14 @@ export function Hero() {
 	return (
 		<section className="relative overflow-hidden bg-grid py-20 sm:py-28 lg:py-32">
 			<div className="mx-auto max-w-6xl px-4 sm:px-6">
-				<div className="grid gap-12 lg:grid-cols-2 lg:gap-16 items-center">
+				<div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
 					<div className="max-w-xl">
-						<h1 className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl leading-[1.1]">
+						<p className="label-mono mb-5">Indexing health · since Q1 2026</p>
+						<h1 className="display text-5xl sm:text-6xl lg:text-7xl">
 							Stop publishing{" "}
-							<span className="text-gradient">invisible pages.</span>
+							<span className="text-highlight">invisible pages.</span>
 						</h1>
-						<p className="mt-6 text-lg text-muted leading-relaxed">
+						<p className="mt-6 text-lg leading-relaxed text-muted">
 							IndexFast scans your sitemap, detects unindexed URLs, diagnoses technical
 							blockers, and automates safe discovery through IndexNow, Bing, and Google
 							Search Console workflows.
@@ -18,13 +19,13 @@ export function Hero() {
 						<div className="mt-8 flex flex-col gap-3 sm:flex-row">
 							<Link
 								href="#cta"
-								className="inline-flex items-center justify-center rounded-lg bg-accent px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-accent-dark"
+								className="inline-flex items-center justify-center bg-ink px-6 py-3 text-sm font-semibold text-surface transition-colors hover:bg-ink/85"
 							>
 								Run free indexing audit
 							</Link>
 							<Link
 								href="#demo"
-								className="inline-flex items-center justify-center rounded-lg border border-border px-6 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-card"
+								className="inline-flex items-center justify-center border border-ink px-6 py-3 text-sm font-semibold text-ink transition-colors hover:bg-ink hover:text-surface"
 							>
 								View demo dashboard
 							</Link>
@@ -42,51 +43,56 @@ export function Hero() {
 
 function DashboardMockup() {
 	return (
-		<div className="rounded-xl border border-border bg-white p-4 shadow-lg shadow-black/5 sm:p-6" id="demo">
-			<div className="mb-4 flex items-center justify-between">
-				<span className="text-sm font-semibold text-foreground">Indexing Overview</span>
-				<span className="rounded-full bg-green-50 px-2.5 py-0.5 text-xs font-medium text-green-700">Live</span>
+		<div className="border border-ink bg-card p-4 sm:p-6" id="demo">
+			<div className="mb-5 flex items-center justify-between border-b border-ink/15 pb-4">
+				<span className="label-mono text-ink">Indexing Overview</span>
+				<span className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-ink">
+					<span className="h-2 w-2 bg-accent" />
+					Live
+				</span>
 			</div>
-			<div className="grid grid-cols-3 gap-3">
+			<div className="grid grid-cols-3 gap-px bg-ink/15">
 				<StatCard label="Total URLs" value="12,847" />
-				<StatCard label="Indexed" value="10,231" color="text-green-600" />
-				<StatCard label="Not Indexed" value="2,104" color="text-amber-600" />
-				<StatCard label="Blocked" value="312" color="text-red-500" />
-				<StatCard label="Dropped" value="87" color="text-orange-500" />
-				<StatCard label="Health Score" value="79%" color="text-accent" />
+				<StatCard label="Indexed" value="10,231" />
+				<StatCard label="Not Indexed" value="2,104" />
+				<StatCard label="Blocked" value="312" />
+				<StatCard label="Dropped" value="87" />
+				<StatCard label="Health" value="79%" accent />
 			</div>
-			<div className="mt-4 rounded-lg bg-card p-3">
-				<div className="mb-2 flex items-center justify-between text-xs text-muted">
-					<span>Indexing Health</span>
-					<span className="font-medium text-foreground">79.6%</span>
+			<div className="mt-5">
+				<div className="mb-2 flex items-center justify-between">
+					<span className="label-mono">Indexing Health</span>
+					<span className="text-sm font-bold text-ink">79.6%</span>
 				</div>
-				<div className="h-2 w-full overflow-hidden rounded-full bg-gray-200">
-					<div className="h-2 rounded-full bg-accent" style={{ width: "79.6%" }} />
+				<div className="h-2 w-full overflow-hidden bg-ink/10">
+					<div className="h-2 bg-accent" style={{ width: "79.6%" }} />
 				</div>
 			</div>
-			<div className="mt-4 space-y-2">
-				<div className="flex items-center justify-between rounded-lg bg-card px-3 py-2 text-xs">
-					<span className="text-muted truncate mr-2">/blog/seo-tips-2024</span>
-					<span className="shrink-0 rounded bg-amber-100 px-1.5 py-0.5 font-medium text-amber-700">Not indexed</span>
-				</div>
-				<div className="flex items-center justify-between rounded-lg bg-card px-3 py-2 text-xs">
-					<span className="text-muted truncate mr-2">/products/widget-pro</span>
-					<span className="shrink-0 rounded bg-green-100 px-1.5 py-0.5 font-medium text-green-700">Indexed</span>
-				</div>
-				<div className="flex items-center justify-between rounded-lg bg-card px-3 py-2 text-xs">
-					<span className="text-muted truncate mr-2">/category/directory-listings</span>
-					<span className="shrink-0 rounded bg-red-100 px-1.5 py-0.5 font-medium text-red-600">Blocked</span>
-				</div>
+			<div className="mt-5 space-y-px bg-ink/15">
+				<UrlRow url="/blog/seo-tips-2024" status="Not indexed" />
+				<UrlRow url="/products/widget-pro" status="Indexed" />
+				<UrlRow url="/category/directory-listings" status="Blocked" />
 			</div>
 		</div>
 	);
 }
 
-function StatCard({ label, value, color }: { label: string; value: string; color?: string }) {
+function StatCard({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
 	return (
-		<div className="rounded-lg bg-card p-3 text-center">
-			<p className={`text-lg font-bold ${color || "text-foreground"}`}>{value}</p>
-			<p className="text-xs text-muted">{label}</p>
+		<div className={`p-3 text-center ${accent ? "bg-accent" : "bg-card"}`}>
+			<p className="stat text-2xl text-ink">{value}</p>
+			<p className="mt-1 text-[11px] uppercase tracking-wide text-muted">{label}</p>
+		</div>
+	);
+}
+
+function UrlRow({ url, status }: { url: string; status: string }) {
+	return (
+		<div className="flex items-center justify-between bg-card px-3 py-2.5 text-xs">
+			<span className="mr-2 truncate font-mono text-muted">{url}</span>
+			<span className="shrink-0 border border-ink/20 px-1.5 py-0.5 font-semibold uppercase tracking-wide text-ink">
+				{status}
+			</span>
 		</div>
 	);
 }
