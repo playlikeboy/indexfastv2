@@ -66,6 +66,25 @@ function normalizeSitemapUrl(sitemapUrl: string | undefined, domain: string) {
 	return url.toString();
 }
 
+function extractSitemapUrls(xmlText: string, domain: string) {
+	const locRegex = /<loc>(https?:\/\/[^<]+)<\/loc>/gi;
+	const discovered = new Set<string>();
+	let match: RegExpExecArray | null;
+
+	while ((match = locRegex.exec(xmlText)) !== null) {
+		try {
+			const url = new URL(match[1].trim());
+			if ((url.protocol === "http:" || url.protocol === "https:") && normalizeDomain(url.hostname) === domain) {
+				discovered.add(url.toString());
+			}
+		} catch {
+			// Ignore malformed sitemap entries and keep processing valid URLs.
+		}
+	}
+
+	return Array.from(discovered);
+}
+
 async function getSiteForUser(siteId: string, userId: string) {
 	const [site] = await db
 		.select()
@@ -166,36 +185,25 @@ export async function syncSitemap(siteId: string) {
 
 		const xmlText = await response.text();
 
-		// Highly reliable simple regex tags parser for sitemaps
-		const locRegex = /<loc>(https?:\/\/[^<]+)<\/loc>/gi;
-		const foundUrls: string[] = [];
-		let match: RegExpExecArray | null;
-		while ((match = locRegex.exec(xmlText)) !== null) {
-			foundUrls.push(match[1]);
-		}
+		const foundUrls = extractSitemapUrls(xmlText, site.domain);
 
 		if (foundUrls.length === 0) {
-			throw new Error("No URL tags found in the sitemap.");
+			throw new Error("No matching URL tags found in the sitemap.");
 		}
 
-		// Insert found URLs into urls table
-		for (const loc of foundUrls.slice(0, 50)) {
-			// Limit to first 50 to avoid high DB overload on free tiers
-			const existing = await db
-				.select()
-				.from(urls)
-				.where(and(eq(urls.siteId, siteId), eq(urls.loc, loc)))
-				.limit(1);
-
-			if (existing.length === 0) {
-				await db.insert(urls).values({
+		const urlsToSync = foundUrls.slice(0, 50);
+		const insertedUrls = await db
+			.insert(urls)
+			.values(
+				urlsToSync.map((loc) => ({
 					siteId,
 					loc,
 					indexingStatus: "unknown",
 					gscStatus: "unknown",
-				});
-			}
-		}
+				})),
+			)
+			.onConflictDoNothing({ target: [urls.siteId, urls.loc] })
+			.returning({ id: urls.id });
 
 		await db
 			.update(sitemaps)
@@ -205,7 +213,7 @@ export async function syncSitemap(siteId: string) {
 			})
 			.where(eq(sitemaps.id, sitemapSync.id));
 
-		return { success: true, count: foundUrls.length };
+		return { success: true, count: urlsToSync.length, insertedCount: insertedUrls.length };
 	} catch (error: unknown) {
 		const message = getErrorMessage(error);
 
@@ -323,11 +331,11 @@ export async function submitToIndexNow(siteId: string, urlLoc: string) {
 		// Record the submission
 		const [sub] = await db
 			.insert(submissions)
-				.values({
-					siteId,
-					loc: submittedUrl.toString(),
-					engine: "indexnow",
-					status: "submitted",
+			.values({
+				siteId,
+				loc: submittedUrl.toString(),
+				engine: "indexnow",
+				status: "submitted",
 			})
 			.returning();
 
