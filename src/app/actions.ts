@@ -307,6 +307,8 @@ export async function submitToIndexNow(siteId: string, urlLoc: string) {
 	const site = await getSiteForUser(siteId, user.id);
 	if (!site) throw new Error("Site not found");
 
+	let submissionId: string | null = null;
+
 	try {
 		const submittedUrl = new URL(urlLoc);
 		if (submittedUrl.protocol !== "http:" && submittedUrl.protocol !== "https:") {
@@ -338,6 +340,7 @@ export async function submitToIndexNow(siteId: string, urlLoc: string) {
 				status: "submitted",
 			})
 			.returning();
+		submissionId = sub.id;
 
 		const response = await fetch(endpoint, {
 			method: "POST",
@@ -359,6 +362,18 @@ export async function submitToIndexNow(siteId: string, urlLoc: string) {
 
 		return { success: true };
 	} catch (error: unknown) {
-		return { success: false, error: getErrorMessage(error) };
+		const message = getErrorMessage(error);
+
+		if (submissionId) {
+			await db
+				.update(submissions)
+				.set({
+					status: "failed",
+					responseMessage: message,
+				})
+				.where(eq(submissions.id, submissionId));
+		}
+
+		return { success: false, error: message };
 	}
 }
