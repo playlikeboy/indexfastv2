@@ -22,6 +22,7 @@ export function Navbar() {
 				<Link href="/" className="flex items-center gap-2.5 text-lg font-extrabold tracking-tight">
 					<Logo />
 					IndexFast
+					<span className="rounded-full bg-accent/10 px-2 py-0.5 text-xs font-medium text-accent">Beta</span>
 				</Link>
 				<div className="hidden items-center gap-7 md:flex">
 					<a href="#features" className="text-sm text-muted transition-colors hover:text-ink">Features</a>
