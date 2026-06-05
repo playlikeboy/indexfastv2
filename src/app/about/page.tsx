@@ -1,12 +1,21 @@
 import Link from "next/link";
 import { Navbar } from "@/components/marketing/Navbar";
 import { Footer } from "@/components/marketing/Footer";
+import { BreadcrumbJsonLd } from "@/components/marketing/BreadcrumbJsonLd";
+
+const SITE_URL = "https://indexfast.co";
+
+const breadcrumbs = [
+	{ name: "Home", url: SITE_URL },
+	{ name: "About", url: `${SITE_URL}/about` },
+];
 
 export default function AboutPage() {
 	return (
 		<>
 			<Navbar />
 			<main>
+				<BreadcrumbJsonLd items={breadcrumbs} />
 				<section className="py-20 sm:py-28" id="about" aria-labelledby="about-heading">
 					<div className="mx-auto max-w-3xl px-4 sm:px-6">
 						<p className="label-mono">About</p>

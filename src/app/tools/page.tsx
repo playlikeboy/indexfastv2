@@ -2,81 +2,13 @@ import Link from "next/link";
 import { Navbar } from "@/components/marketing/Navbar";
 import { Footer } from "@/components/marketing/Footer";
 import { BreadcrumbJsonLd } from "@/components/marketing/BreadcrumbJsonLd";
+import { tools } from "@/lib/marketing-data";
 
 const SITE_URL = "https://indexfast.co";
 
 const breadcrumbs = [
 	{ name: "Home", url: SITE_URL },
 	{ name: "Free SEO Tools", url: `${SITE_URL}/tools` },
-];
-
-const tools = [
-	{
-		title: "Google Index Checker",
-		description: "Check if a URL is indexed by Google using live SERP verification.",
-		href: "/tools/google-index-checker",
-		tag: "Popular",
-	},
-	{
-		title: "Bulk Index Checker",
-		description: "Check indexing status for hundreds of URLs at once via CSV or CSV-style bulk input.",
-		href: "/tools/bulk-index-checker",
-		tag: "Popular",
-	},
-	{
-		title: "Sitemap URL Extractor",
-		description: "Parse any XML sitemap and extract every URL for review or bulk analysis.",
-		href: "/tools/sitemap-url-extractor",
-		tag: "Popular",
-	},
-	{
-		title: "Robots.txt Checker",
-		description: "Instant robots.txt analysis showing crawl rules, sitemap references, and blocked paths.",
-		href: "/tools/robots-txt-checker",
-		tag: null,
-	},
-	{
-		title: "Noindex Tag Checker",
-		description: "Scan a URL or list of URLs for noindex meta tags and X-Robots-Tag headers.",
-		href: "/tools/noindex-tag-checker",
-		tag: null,
-	},
-	{
-		title: "Canonical Checker",
-		description: "Verify that canonical tags match the actual URL and detect mismatches.",
-		href: "/tools/canonical-checker",
-		tag: null,
-	},
-	{
-		title: "HTTP Status Checker",
-		description: "Check HTTP status codes, redirect chains, and response headers for any URL.",
-		href: "/tools/http-status-checker",
-		tag: null,
-	},
-	{
-		title: "IndexNow Key Generator",
-		description: "Generate a secure IndexNow key for Bing, Yandex, and other supported search engines.",
-		href: "/tools/indexnow-key-generator",
-		tag: null,
-	},
-	{
-		title: "Bing IndexNow Submitter",
-		description: "Submit up to 10,000 URLs per request via the IndexNow protocol to Bing and Yandex.",
-		href: "/tools/bing-indexnow-submitter",
-		tag: null,
-	},
-	{
-		title: "llms.txt Generator",
-		description: "Generate an llms.txt file describing your site for AI crawlers and LLM indexing.",
-		href: "/tools/llms-txt-generator",
-		tag: null,
-	},
-	{
-		title: "AI Crawler Checker",
-		description: "Detect which AI crawlers can access your pages and identify blocking rules.",
-		href: "/tools/ai-crawler-checker",
-		tag: null,
-	},
 ];
 
 export default function ToolsPage() {
@@ -99,8 +31,8 @@ export default function ToolsPage() {
 						<div className="mt-12 grid gap-px bg-ink/10 sm:grid-cols-2 lg:grid-cols-3">
 							{tools.map((tool) => (
 								<Link
-									key={tool.href}
-									href={tool.href}
+									key={tool.slug}
+									href={`/tools/${tool.slug}`}
 									className="group relative bg-surface p-6 transition-colors hover:bg-accent"
 								>
 									<div className="flex items-start justify-between gap-3">

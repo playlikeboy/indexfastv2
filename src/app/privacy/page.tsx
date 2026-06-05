@@ -1,6 +1,16 @@
+"use client";
+
 import Link from "next/link";
 import { Navbar } from "@/components/marketing/Navbar";
 import { Footer } from "@/components/marketing/Footer";
+import { BreadcrumbJsonLd } from "@/components/marketing/BreadcrumbJsonLd";
+
+const SITE_URL = "https://indexfast.co";
+
+const breadcrumbs = [
+	{ name: "Home", url: SITE_URL },
+	{ name: "Privacy Policy", url: `${SITE_URL}/privacy` },
+];
 
 export default function PrivacyPage() {
 	return (

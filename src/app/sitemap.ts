@@ -1,9 +1,10 @@
 import { MetadataRoute } from "next";
+import { blogPosts, tools } from "@/lib/marketing-data";
 
 const SITE_URL = "https://indexfast.co";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-	return [
+	const staticRoutes: MetadataRoute.Sitemap = [
 		{
 			url: SITE_URL,
 			lastModified: new Date(),
@@ -29,6 +30,30 @@ export default function sitemap(): MetadataRoute.Sitemap {
 			priority: 0.8,
 		},
 		{
+			url: `${SITE_URL}/about`,
+			lastModified: new Date(),
+			changeFrequency: "monthly",
+			priority: 0.7,
+		},
+		{
+			url: `${SITE_URL}/contact`,
+			lastModified: new Date(),
+			changeFrequency: "monthly",
+			priority: 0.6,
+		},
+		{
+			url: `${SITE_URL}/privacy`,
+			lastModified: new Date(),
+			changeFrequency: "yearly",
+			priority: 0.3,
+		},
+		{
+			url: `${SITE_URL}/terms`,
+			lastModified: new Date(),
+			changeFrequency: "yearly",
+			priority: 0.3,
+		},
+		{
 			url: `${SITE_URL}/login`,
 			lastModified: new Date(),
 			changeFrequency: "monthly",
@@ -40,71 +65,21 @@ export default function sitemap(): MetadataRoute.Sitemap {
 			changeFrequency: "monthly",
 			priority: 0.5,
 		},
-		{
-			url: `${SITE_URL}/tools/google-index-checker`,
-			lastModified: new Date(),
-			changeFrequency: "weekly",
-			priority: 0.7,
-		},
-		{
-			url: `${SITE_URL}/tools/bulk-index-checker`,
-			lastModified: new Date(),
-			changeFrequency: "weekly",
-			priority: 0.7,
-		},
-		{
-			url: `${SITE_URL}/tools/sitemap-url-extractor`,
-			lastModified: new Date(),
-			changeFrequency: "weekly",
-			priority: 0.7,
-		},
-		{
-			url: `${SITE_URL}/tools/robots-txt-checker`,
-			lastModified: new Date(),
-			changeFrequency: "weekly",
-			priority: 0.7,
-		},
-		{
-			url: `${SITE_URL}/tools/noindex-tag-checker`,
-			lastModified: new Date(),
-			changeFrequency: "weekly",
-			priority: 0.7,
-		},
-		{
-			url: `${SITE_URL}/tools/canonical-checker`,
-			lastModified: new Date(),
-			changeFrequency: "weekly",
-			priority: 0.7,
-		},
-		{
-			url: `${SITE_URL}/tools/http-status-checker`,
-			lastModified: new Date(),
-			changeFrequency: "weekly",
-			priority: 0.7,
-		},
-		{
-			url: `${SITE_URL}/tools/indexnow-key-generator`,
-			lastModified: new Date(),
-			changeFrequency: "weekly",
-			priority: 0.7,
-		},
-		{
-			url: `${SITE_URL}/tools/bing-indexnow-submitter`,
-			lastModified: new Date(),
-			changeFrequency: "weekly",
-			priority: 0.7,
-		},
-		{
-			url: `${SITE_URL}/tools/llms-txt-generator`,
-			lastModified: new Date(),
-			changeFrequency: "weekly",
-			priority: 0.7,
-		},
-		{
-			url: `${SITE_URL}/tools/ai-crawler-checker`,
-			lastModified: new Date(),
-			changeFrequency: "weekly",
-			priority: 0.7,
-		},
 	];
+
+	const toolRoutes: MetadataRoute.Sitemap = tools.map((tool) => ({
+		url: `${SITE_URL}/tools/${tool.slug}`,
+		lastModified: new Date(),
+		changeFrequency: "weekly",
+		priority: 0.7,
+	}));
+
+	const blogRoutes: MetadataRoute.Sitemap = blogPosts.map((post) => ({
+		url: `${SITE_URL}/blog/${post.slug}`,
+		lastModified: new Date(post.date),
+		changeFrequency: "monthly",
+		priority: 0.6,
+	}));
+
+	return [...staticRoutes, ...toolRoutes, ...blogRoutes];
 }
