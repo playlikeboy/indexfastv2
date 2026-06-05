@@ -1,8 +1,6 @@
 import Link from "next/link";
 import { Send } from "lucide-react";
-import { desc, eq, inArray } from "drizzle-orm";
-import { db } from "@/db";
-import { sites, submissions } from "@/db/schema";
+import { getSubmissionLog } from "@/db/dashboard";
 import { stack } from "@/stack";
 
 function formatDate(value: Date | null) {
@@ -19,19 +17,7 @@ export default async function SubmissionsPage() {
 	const user = await stack.getUser();
 	if (!user) return null;
 
-	const userSites = await db.select().from(sites).where(eq(sites.userId, user.id));
-	const siteIds = userSites.map((site) => site.id);
-	const siteNames = new Map(userSites.map((site) => [site.id, site.name]));
-
-	const submissionRows =
-		siteIds.length > 0
-			? await db
-					.select()
-					.from(submissions)
-					.where(inArray(submissions.siteId, siteIds))
-					.orderBy(desc(submissions.createdAt))
-					.limit(50)
-			: [];
+	const { submissions: submissionRows, total } = await getSubmissionLog(user.id);
 
 	return (
 		<div className="space-y-6">
@@ -43,7 +29,7 @@ export default async function SubmissionsPage() {
 					</div>
 					<span className="inline-flex items-center gap-2 self-start bg-[#ccff00] px-3 py-2 font-mono text-xs font-black uppercase text-black border-2 border-black">
 						<Send className="h-4 w-4" />
-						{submissionRows.length} events
+						{total} events
 					</span>
 				</div>
 			</div>
@@ -73,7 +59,7 @@ export default async function SubmissionsPage() {
 									<td className="px-4 py-3 font-mono text-xs text-neutral-600">{submission.loc}</td>
 									<td className="px-4 py-3">
 										<Link href={`/dashboard/sites/${submission.siteId}`} className="font-bold hover:underline">
-											{siteNames.get(submission.siteId) || "Unknown"}
+											{submission.siteName}
 										</Link>
 									</td>
 									<td className="px-4 py-3 uppercase">{submission.engine}</td>

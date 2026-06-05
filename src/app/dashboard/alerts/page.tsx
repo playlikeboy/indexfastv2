@@ -1,8 +1,6 @@
 import Link from "next/link";
 import { AlertTriangle, CheckCircle } from "lucide-react";
-import { desc, eq, inArray } from "drizzle-orm";
-import { db } from "@/db";
-import { alerts, sites } from "@/db/schema";
+import { getAlertCenter } from "@/db/dashboard";
 import { stack } from "@/stack";
 
 function formatDate(value: Date | null) {
@@ -19,19 +17,7 @@ export default async function AlertsPage() {
 	const user = await stack.getUser();
 	if (!user) return null;
 
-	const userSites = await db.select().from(sites).where(eq(sites.userId, user.id));
-	const siteIds = userSites.map((site) => site.id);
-	const siteNames = new Map(userSites.map((site) => [site.id, site.name]));
-
-	const alertRows =
-		siteIds.length > 0
-			? await db
-					.select()
-					.from(alerts)
-					.where(inArray(alerts.siteId, siteIds))
-					.orderBy(desc(alerts.createdAt))
-					.limit(50)
-			: [];
+	const { alerts: alertRows, total } = await getAlertCenter(user.id);
 
 	return (
 		<div className="space-y-6">
@@ -43,7 +29,7 @@ export default async function AlertsPage() {
 					</div>
 					<span className="inline-flex items-center gap-2 self-start bg-[#ccff00] px-3 py-2 font-mono text-xs font-black uppercase text-black border-2 border-black">
 						<AlertTriangle className="h-4 w-4" />
-						{alertRows.length} tracked
+						{total} tracked
 					</span>
 				</div>
 			</div>
@@ -64,7 +50,10 @@ export default async function AlertsPage() {
 								<div>
 									<h3 className="font-black uppercase tracking-tight">{alert.title}</h3>
 									<p className="mt-1 font-mono text-xs text-neutral-500">
-										{siteNames.get(alert.siteId) || "Unknown site"} / {formatDate(alert.createdAt)}
+										{alert.siteName} / {formatDate(alert.createdAt)}
+									</p>
+									<p className="mt-2 inline-flex border border-black bg-neutral-100 px-2 py-1 font-mono text-[10px] font-black uppercase">
+										{alert.resolved ? "Resolved" : "Open"}
 									</p>
 									<p className="mt-3 text-sm text-neutral-700">{alert.message}</p>
 								</div>

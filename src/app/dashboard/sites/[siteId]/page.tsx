@@ -2,10 +2,8 @@ import Link from "next/link";
 import { revalidatePath } from "next/cache";
 import { notFound } from "next/navigation";
 import { AlertTriangle, Database, Globe, Send } from "lucide-react";
-import { and, desc, eq } from "drizzle-orm";
 import { syncSitemap, verifySite } from "@/app/actions";
-import { db } from "@/db";
-import { alerts, sites, sitemaps, submissions, urls } from "@/db/schema";
+import { getSiteDashboard } from "@/db/dashboard";
 import { stack } from "@/stack";
 
 type SiteDetailPageProps = {
@@ -27,15 +25,13 @@ export default async function SiteDetailPage({ params }: SiteDetailPageProps) {
 	if (!user) return null;
 
 	const { siteId } = await params;
-	const [site] = await db
-		.select()
-		.from(sites)
-		.where(and(eq(sites.id, siteId), eq(sites.userId, user.id)))
-		.limit(1);
+	const siteDashboard = await getSiteDashboard(user.id, siteId);
 
-	if (!site) {
+	if (!siteDashboard) {
 		notFound();
 	}
+
+	const { site, stats, recentUrls, recentSitemaps, recentAlerts } = siteDashboard;
 
 	async function verifyCurrentSite() {
 		"use server";
@@ -50,18 +46,6 @@ export default async function SiteDetailPage({ params }: SiteDetailPageProps) {
 		revalidatePath("/dashboard");
 		revalidatePath(`/dashboard/sites/${siteId}`);
 	}
-
-	const [urlRows, sitemapRows, alertRows, submissionRows] = await Promise.all([
-		db.select().from(urls).where(eq(urls.siteId, site.id)).orderBy(desc(urls.createdAt)).limit(25),
-		db.select().from(sitemaps).where(eq(sitemaps.siteId, site.id)).orderBy(desc(sitemaps.createdAt)).limit(10),
-		db.select().from(alerts).where(eq(alerts.siteId, site.id)).orderBy(desc(alerts.createdAt)).limit(10),
-		db
-			.select()
-			.from(submissions)
-			.where(eq(submissions.siteId, site.id))
-			.orderBy(desc(submissions.createdAt))
-			.limit(10),
-	]);
 
 	return (
 		<div className="space-y-8">
@@ -109,28 +93,28 @@ export default async function SiteDetailPage({ params }: SiteDetailPageProps) {
 				<div className="bg-[#ccff00] border-4 border-black p-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
 					<Database className="h-5 w-5" />
 					<p className="mt-3 font-mono text-xs font-bold uppercase text-neutral-700">URLs</p>
-					<p className="mt-1 text-2xl font-black">{urlRows.length}</p>
+					<p className="mt-1 text-2xl font-black">{stats.totalUrls}</p>
 				</div>
 				<div className="bg-white border-4 border-black p-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
 					<AlertTriangle className="h-5 w-5 text-red-600" />
-					<p className="mt-3 font-mono text-xs font-bold uppercase text-neutral-500">Alerts</p>
-					<p className="mt-1 text-2xl font-black">{alertRows.length}</p>
+					<p className="mt-3 font-mono text-xs font-bold uppercase text-neutral-500">Pending Alerts</p>
+					<p className="mt-1 text-2xl font-black">{stats.pendingAlerts}</p>
 				</div>
 				<div className="bg-white border-4 border-black p-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
 					<Send className="h-5 w-5" />
 					<p className="mt-3 font-mono text-xs font-bold uppercase text-neutral-500">Submissions</p>
-					<p className="mt-1 text-2xl font-black">{submissionRows.length}</p>
+					<p className="mt-1 text-2xl font-black">{stats.totalSubmissions}</p>
 				</div>
 			</div>
 
 			<div className="grid gap-8 lg:grid-cols-3">
 				<section className="lg:col-span-2 bg-white border-4 border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
 					<h3 className="text-xl font-black uppercase tracking-tight">Recent URLs</h3>
-					{urlRows.length === 0 ? (
+					{recentUrls.length === 0 ? (
 						<p className="mt-4 font-mono text-sm text-neutral-500">No URLs synced yet.</p>
 					) : (
 						<div className="mt-5 divide-y-2 divide-neutral-200">
-							{urlRows.map((url) => (
+							{recentUrls.map((url) => (
 								<div key={url.id} className="py-3">
 									<p className="truncate font-mono text-xs text-neutral-600">{url.loc}</p>
 									<p className="mt-1 text-xs font-bold uppercase text-neutral-500">
@@ -145,11 +129,11 @@ export default async function SiteDetailPage({ params }: SiteDetailPageProps) {
 				<section className="space-y-6">
 					<div className="bg-white border-4 border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
 						<h3 className="text-xl font-black uppercase tracking-tight">Sitemap Syncs</h3>
-						{sitemapRows.length === 0 ? (
+						{recentSitemaps.length === 0 ? (
 							<p className="mt-4 font-mono text-sm text-neutral-500">No sync history yet.</p>
 						) : (
 							<div className="mt-5 space-y-4">
-								{sitemapRows.map((sitemap) => (
+								{recentSitemaps.map((sitemap) => (
 									<div key={sitemap.id}>
 										<p className="font-mono text-xs font-black uppercase">{sitemap.status}</p>
 										<p className="mt-1 font-mono text-xs text-neutral-500">{formatDate(sitemap.lastSyncTime || sitemap.createdAt)}</p>
@@ -160,11 +144,11 @@ export default async function SiteDetailPage({ params }: SiteDetailPageProps) {
 					</div>
 					<div className="bg-white border-4 border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
 						<h3 className="text-xl font-black uppercase tracking-tight">Latest Alerts</h3>
-						{alertRows.length === 0 ? (
+						{recentAlerts.length === 0 ? (
 							<p className="mt-4 font-mono text-sm text-neutral-500">No alerts for this site.</p>
 						) : (
 							<div className="mt-5 space-y-4">
-								{alertRows.map((alert) => (
+								{recentAlerts.map((alert) => (
 									<div key={alert.id}>
 										<p className="font-bold">{alert.title}</p>
 										<p className="mt-1 text-xs text-neutral-500">{formatDate(alert.createdAt)}</p>

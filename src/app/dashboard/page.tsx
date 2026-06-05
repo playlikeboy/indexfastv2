@@ -1,44 +1,15 @@
 import React from "react";
-import { db } from "@/db";
-import { sites, urls, alerts, submissions } from "@/db/schema";
-import { eq, inArray, count } from "drizzle-orm";
 import { stack } from "@/stack";
 import { AddSiteForm } from "@/components/dashboard/AddSiteForm";
 import Link from "next/link";
 import { Globe, AlertTriangle, CheckCircle, Database, ChevronRight, Check } from "lucide-react";
+import { getDashboardOverview } from "@/db/dashboard";
 
 export default async function DashboardOverview() {
 	const user = await stack.getUser();
 	if (!user) return null;
 
-	// Load properties for user
-	const userSites = await db.select().from(sites).where(eq(sites.userId, user.id));
-	const siteIds = userSites.map((s) => s.id);
-
-	// Get aggregate stats
-	let totalUrls = 0;
-	let totalAlerts = 0;
-	let totalSubmissions = 0;
-
-	if (siteIds.length > 0) {
-		const [urlCount] = await db
-			.select({ value: count() })
-			.from(urls)
-			.where(inArray(urls.siteId, siteIds));
-		totalUrls = urlCount?.value || 0;
-
-		const [alertCount] = await db
-			.select({ value: count() })
-			.from(alerts)
-			.where(inArray(alerts.siteId, siteIds));
-		totalAlerts = alertCount?.value || 0;
-
-		const [subCount] = await db
-			.select({ value: count() })
-			.from(submissions)
-			.where(inArray(submissions.siteId, siteIds));
-		totalSubmissions = subCount?.value || 0;
-	}
+	const { sites: userSites, stats } = await getDashboardOverview(user.id);
 
 	return (
 		<div className="space-y-8">
@@ -49,9 +20,9 @@ export default async function DashboardOverview() {
 					<div className="font-mono text-xs font-bold uppercase text-neutral-500 mb-2 flex items-center gap-1.5">
 						<Globe className="w-4 h-4 text-black" /> Connected Sites
 					</div>
-					<div className="text-4xl font-black">{userSites.length}</div>
+					<div className="text-4xl font-black">{stats.totalSites}</div>
 					<div className="font-mono text-[10px] text-green-600 font-bold uppercase mt-2">
-						✓ All active & verified
+						{stats.verifiedSites} verified / {stats.pendingSites} pending
 					</div>
 				</div>
 
@@ -60,7 +31,7 @@ export default async function DashboardOverview() {
 					<div className="font-mono text-xs font-bold uppercase text-neutral-700 mb-2 flex items-center gap-1.5">
 						<Database className="w-4 h-4 text-black" /> Monitored URLs
 					</div>
-					<div className="text-4xl font-black">{totalUrls}</div>
+					<div className="text-4xl font-black">{stats.totalUrls}</div>
 					<div className="font-mono text-[10px] text-black font-bold uppercase mt-2">
 						Indexed catalog capacity
 					</div>
@@ -71,20 +42,20 @@ export default async function DashboardOverview() {
 					<div className="font-mono text-xs font-bold uppercase text-neutral-500 mb-2 flex items-center gap-1.5">
 						<CheckCircle className="w-4 h-4 text-green-600" /> Auto Submissions
 					</div>
-					<div className="text-4xl font-black">{totalSubmissions}</div>
+					<div className="text-4xl font-black">{stats.totalSubmissions}</div>
 					<div className="font-mono text-[10px] text-neutral-500 font-bold uppercase mt-2">
 						IndexNow & Bing API signals
 					</div>
 				</div>
 
 				{/* Stat Card 4 */}
-				<div className={`border-4 border-black p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-all ${totalAlerts > 0 ? "bg-red-200" : "bg-white"}`}>
+				<div className={`border-4 border-black p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-all ${stats.pendingAlerts > 0 ? "bg-red-200" : "bg-white"}`}>
 					<div className="font-mono text-xs font-bold uppercase text-neutral-500 mb-2 flex items-center gap-1.5">
-						<AlertTriangle className={`w-4 h-4 ${totalAlerts > 0 ? "text-red-600 animate-bounce" : "text-neutral-500"}`} /> Pending Alerts
+						<AlertTriangle className={`w-4 h-4 ${stats.pendingAlerts > 0 ? "text-red-600 animate-bounce" : "text-neutral-500"}`} /> Pending Alerts
 					</div>
-					<div className="text-4xl font-black">{totalAlerts}</div>
+					<div className="text-4xl font-black">{stats.pendingAlerts}</div>
 					<div className="font-mono text-[10px] text-neutral-600 font-bold uppercase mt-2">
-						{totalAlerts > 0 ? "⚠️ Requires attention" : "✓ Infrastructure clean"}
+						{stats.pendingAlerts > 0 ? "Requires attention" : "Infrastructure clean"}
 					</div>
 				</div>
 			</div>
@@ -97,7 +68,7 @@ export default async function DashboardOverview() {
 						<h2 className="text-2xl font-black uppercase mb-4 tracking-tight flex items-center justify-between">
 							<span>Monitored Domains</span>
 							<span className="font-mono text-xs font-bold bg-neutral-200 text-neutral-800 px-3 py-1 border border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
-								{userSites.length} ACTIVE
+								{stats.totalSites} ACTIVE
 							</span>
 						</h2>
 
@@ -124,6 +95,13 @@ export default async function DashboardOverview() {
 												)}
 											</div>
 											<p className="font-mono text-xs text-neutral-500 mt-0.5 select-all">{site.domain}</p>
+											<div className="mt-3 flex flex-wrap gap-2 font-mono text-[10px] font-black uppercase">
+												<span className="border border-black bg-neutral-100 px-2 py-1">{site.urlCount} URLs</span>
+												<span className={`border border-black px-2 py-1 ${site.pendingAlertCount > 0 ? "bg-red-100 text-red-800" : "bg-neutral-100"}`}>
+													{site.pendingAlertCount} alerts
+												</span>
+												<span className="border border-black bg-neutral-100 px-2 py-1">{site.submissionCount} submissions</span>
+											</div>
 											{site.sitemapUrl && (
 												<div className="font-mono text-[10px] bg-neutral-100 text-neutral-600 inline-block px-2 py-1 border border-neutral-300 mt-2 rounded-sm truncate max-w-xs sm:max-w-md">
 													Sitemap: {site.sitemapUrl}
