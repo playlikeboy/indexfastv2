@@ -2,7 +2,7 @@
 
 import { db } from "@/db";
 import { users, sites, sitemaps, urls, checks, submissions, alerts } from "@/db/schema";
-import { eq, and, desc } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { stack } from "@/stack";
 
 // Helper to get authenticated user or throw
@@ -12,6 +12,68 @@ async function getAuthUser() {
 		throw new Error("Unauthorized");
 	}
 	return user;
+}
+
+function getErrorMessage(error: unknown) {
+	return error instanceof Error ? error.message : "Unknown error";
+}
+
+function normalizeDomain(input: string) {
+	const raw = input.trim();
+	if (!raw) {
+		throw new Error("Domain is required");
+	}
+
+	let hostname: string;
+	try {
+		const url = new URL(raw.includes("://") ? raw : `https://${raw}`);
+		hostname = url.hostname;
+	} catch {
+		throw new Error("Enter a valid domain");
+	}
+
+	const domain = hostname.replace(/^www\./, "").toLowerCase();
+	const validDomain = /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)+$/.test(domain);
+
+	if (!validDomain) {
+		throw new Error("Enter a valid domain");
+	}
+
+	return domain;
+}
+
+function normalizeSitemapUrl(sitemapUrl: string | undefined, domain: string) {
+	const raw = sitemapUrl?.trim();
+	if (!raw) {
+		return null;
+	}
+
+	let url: URL;
+	try {
+		url = new URL(raw);
+	} catch {
+		throw new Error("Enter a valid sitemap URL");
+	}
+
+	if (url.protocol !== "http:" && url.protocol !== "https:") {
+		throw new Error("Sitemap URL must use HTTP or HTTPS");
+	}
+
+	if (normalizeDomain(url.hostname) !== domain) {
+		throw new Error("Sitemap URL must belong to the same domain");
+	}
+
+	return url.toString();
+}
+
+async function getSiteForUser(siteId: string, userId: string) {
+	const [site] = await db
+		.select()
+		.from(sites)
+		.where(and(eq(sites.id, siteId), eq(sites.userId, userId)))
+		.limit(1);
+
+	return site;
 }
 
 // 1. Sync user profile on login/load
@@ -32,18 +94,35 @@ export async function syncUser() {
 // 2. Add Site
 export async function addSite(domain: string, name: string, sitemapUrl?: string) {
 	const userId = await syncUser();
-	const cleanDomain = domain.replace(/^(https?:\/\/)?(www\.)?/, "").split("/")[0].toLowerCase();
-	const verificationToken = `indexfast-verification-${Math.random().toString(36).substring(2, 15)}`;
+	const cleanDomain = normalizeDomain(domain);
+	const cleanName = name.trim();
+	const cleanSitemapUrl = normalizeSitemapUrl(sitemapUrl, cleanDomain);
+
+	if (!cleanName) {
+		throw new Error("Site label is required");
+	}
+
+	const existing = await db
+		.select({ id: sites.id })
+		.from(sites)
+		.where(and(eq(sites.userId, userId), eq(sites.domain, cleanDomain)))
+		.limit(1);
+
+	if (existing.length > 0) {
+		throw new Error("This domain is already connected");
+	}
+
+	const verificationToken = `indexfast-verification-${crypto.randomUUID()}`;
 
 	const [newSite] = await db
 		.insert(sites)
 		.values({
 			userId,
 			domain: cleanDomain,
-			name,
+			name: cleanName,
 			verified: false,
 			verificationToken,
-			sitemapUrl: sitemapUrl || null,
+			sitemapUrl: cleanSitemapUrl,
 		})
 		.returning();
 
@@ -52,8 +131,8 @@ export async function addSite(domain: string, name: string, sitemapUrl?: string)
 
 // 3. Verify Site Ownership (supports simple meta or file check mock)
 export async function verifySite(siteId: string) {
-	await getAuthUser();
-	const [site] = await db.select().from(sites).where(eq(sites.id, siteId)).limit(1);
+	const user = await getAuthUser();
+	const site = await getSiteForUser(siteId, user.id);
 	if (!site) throw new Error("Site not found");
 
 	// For mock/demo purposes, we auto-verify the site if the domain is valid,
@@ -64,8 +143,8 @@ export async function verifySite(siteId: string) {
 
 // 4. Parse & Sync Sitemap
 export async function syncSitemap(siteId: string) {
-	await getAuthUser();
-	const [site] = await db.select().from(sites).where(eq(sites.id, siteId)).limit(1);
+	const user = await getAuthUser();
+	const site = await getSiteForUser(siteId, user.id);
 	if (!site || !site.sitemapUrl) throw new Error("Sitemap URL not configured");
 
 	// Record sync schedule start
@@ -90,7 +169,7 @@ export async function syncSitemap(siteId: string) {
 		// Highly reliable simple regex tags parser for sitemaps
 		const locRegex = /<loc>(https?:\/\/[^<]+)<\/loc>/gi;
 		const foundUrls: string[] = [];
-		let match;
+		let match: RegExpExecArray | null;
 		while ((match = locRegex.exec(xmlText)) !== null) {
 			foundUrls.push(match[1]);
 		}
@@ -127,12 +206,14 @@ export async function syncSitemap(siteId: string) {
 			.where(eq(sitemaps.id, sitemapSync.id));
 
 		return { success: true, count: foundUrls.length };
-	} catch (error: any) {
+	} catch (error: unknown) {
+		const message = getErrorMessage(error);
+
 		await db
 			.update(sitemaps)
 			.set({
 				status: "failed",
-				errorMessage: error.message || "Unknown synchronization error",
+				errorMessage: message,
 				lastSyncTime: new Date(),
 			})
 			.where(eq(sitemaps.id, sitemapSync.id));
@@ -140,7 +221,7 @@ export async function syncSitemap(siteId: string) {
 		await db.insert(alerts).values({
 			siteId,
 			title: "Sitemap Sync Failed",
-			message: `Unable to parse sitemap: ${error.message || "HTTP Connection Error"}`,
+			message: `Unable to parse sitemap: ${message}`,
 			alertType: "sitemap_failure",
 			resolved: false,
 		});
@@ -151,8 +232,16 @@ export async function syncSitemap(siteId: string) {
 
 // 5. Run technical audits on a URL
 export async function checkUrlDiagnostics(urlId: string) {
-	await getAuthUser();
-	const [urlRow] = await db.select().from(urls).where(eq(urls.id, urlId)).limit(1);
+	const user = await getAuthUser();
+	const [urlRow] = await db
+		.select({
+			id: urls.id,
+			loc: urls.loc,
+		})
+		.from(urls)
+		.innerJoin(sites, eq(urls.siteId, sites.id))
+		.where(and(eq(urls.id, urlId), eq(sites.userId, user.id)))
+		.limit(1);
 	if (!urlRow) throw new Error("URL not found");
 
 	try {
@@ -191,24 +280,35 @@ export async function checkUrlDiagnostics(urlId: string) {
 			.where(eq(urls.id, urlId));
 
 		return { success: true };
-	} catch (error: any) {
+	} catch (error: unknown) {
+		const message = getErrorMessage(error);
+
 		await db.insert(checks).values({
 			urlId,
 			checkType: "diagnostics",
 			status: "fail",
-			details: { error: error.message },
+			details: { error: message },
 		});
-		return { success: false, error: error.message };
+		return { success: false, error: message };
 	}
 }
 
 // 6. Request Fast IndexNow / Bing Submissions
 export async function submitToIndexNow(siteId: string, urlLoc: string) {
-	await getAuthUser();
-	const [site] = await db.select().from(sites).where(eq(sites.id, siteId)).limit(1);
+	const user = await getAuthUser();
+	const site = await getSiteForUser(siteId, user.id);
 	if (!site) throw new Error("Site not found");
 
 	try {
+		const submittedUrl = new URL(urlLoc);
+		if (submittedUrl.protocol !== "http:" && submittedUrl.protocol !== "https:") {
+			throw new Error("URL must use HTTP or HTTPS");
+		}
+
+		if (normalizeDomain(submittedUrl.hostname) !== site.domain) {
+			throw new Error("URL must belong to the selected site");
+		}
+
 		// Mock dynamic request to IndexNow endpoint
 		// In production, we send an HTTP POST to: https://api.indexnow.org
 		const endpoint = "https://api.indexnow.org/indexnow";
@@ -217,17 +317,17 @@ export async function submitToIndexNow(siteId: string, urlLoc: string) {
 			host: site.domain,
 			key,
 			keyLocation: `https://${site.domain}/${key}.txt`,
-			urlList: [urlLoc],
+			urlList: [submittedUrl.toString()],
 		};
 
 		// Record the submission
 		const [sub] = await db
 			.insert(submissions)
-			.values({
-				siteId,
-				loc: urlLoc,
-				engine: "indexnow",
-				status: "submitted",
+				.values({
+					siteId,
+					loc: submittedUrl.toString(),
+					engine: "indexnow",
+					status: "submitted",
 			})
 			.returning();
 
@@ -242,7 +342,7 @@ export async function submitToIndexNow(siteId: string, urlLoc: string) {
 				.update(submissions)
 				.set({
 					status: "success",
-					responseMessage: "Successfully submitted and indexed.",
+					responseMessage: "Successfully submitted to IndexNow.",
 				})
 				.where(eq(submissions.id, sub.id));
 		} else {
@@ -250,7 +350,7 @@ export async function submitToIndexNow(siteId: string, urlLoc: string) {
 		}
 
 		return { success: true };
-	} catch (error: any) {
-		return { success: false, error: error.message };
+	} catch (error: unknown) {
+		return { success: false, error: getErrorMessage(error) };
 	}
 }

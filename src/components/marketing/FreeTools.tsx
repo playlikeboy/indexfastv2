@@ -9,7 +9,7 @@ const tools = [
 	{ slug: "canonical-checker", title: "Canonical Checker", desc: "Check canonical tags and detect canonical conflicts." },
 	{ slug: "http-status-checker", title: "HTTP Status Checker", desc: "Check HTTP response codes, redirects, and server errors." },
 	{ slug: "indexnow-key-generator", title: "IndexNow Key Generator", desc: "Generate an IndexNow API key for your domain in seconds." },
-	{ slug: "indexnow-submitter", title: "Bing IndexNow Submitter", desc: "Submit URLs to Bing and IndexNow-supported search engines." },
+	{ slug: "bing-indexnow-submitter", title: "Bing IndexNow Submitter", desc: "Submit URLs to Bing and IndexNow-supported search engines." },
 	{ slug: "llms-txt-generator", title: "llms.txt Generator", desc: "Generate an llms.txt file to make your site AI-crawler ready." },
 ];
 

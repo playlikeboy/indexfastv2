@@ -78,8 +78,8 @@ export const tools: ToolDefinition[] = [
 		outputs: ["Generated key", "Key file path", "Submission payload hint"],
 	},
 	{
-		slug: "indexnow-submitter",
-		aliases: ["bing-indexnow-submitter"],
+		slug: "bing-indexnow-submitter",
+		aliases: ["indexnow-submitter"],
 		title: "Bing IndexNow Submitter",
 		description: "Submit changed URLs through the IndexNow protocol.",
 		checks: ["Domain host", "IndexNow key", "URL list"],
