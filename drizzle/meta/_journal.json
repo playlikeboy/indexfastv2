@@ -8,6 +8,13 @@
       "when": 1780339078394,
       "tag": "0000_useful_mathemanic",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1780679576404,
+      "tag": "0001_add_dashboard_indexes",
+      "breakpoints": true
     }
   ]
 }
