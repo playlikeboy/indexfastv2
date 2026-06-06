@@ -11,13 +11,15 @@ export default async function HandlerPage(props: HandlerPageProps) {
 	const searchParams = await props.searchParams;
 
 	return (
-		<StackHandler
-			app={stack}
-			fullPage={true}
-			routeProps={{
-				params,
-				searchParams,
-			}}
-		/>
+		<div className="flex min-h-screen items-center justify-center bg-[#f2f1ec] px-4 py-10">
+			<StackHandler
+				app={stack}
+				fullPage={false}
+				routeProps={{
+					params,
+					searchParams,
+				}}
+			/>
+		</div>
 	);
 }
