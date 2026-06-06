@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AlertTriangle, CheckCircle } from "lucide-react";
+import { setAlertResolved } from "@/app/actions";
 import { getAlertCenter } from "@/db/dashboard";
 import { stack } from "@/stack";
 
@@ -17,7 +18,7 @@ export default async function AlertsPage() {
 	const user = await stack.getUser();
 	if (!user) return null;
 
-	const { alerts: alertRows, total } = await getAlertCenter(user.id);
+	const { alerts: alertRows, total, openTotal } = await getAlertCenter(user.id);
 
 	return (
 		<div className="space-y-6">
@@ -29,7 +30,7 @@ export default async function AlertsPage() {
 					</div>
 					<span className="inline-flex items-center gap-2 self-start bg-[#ccff00] px-3 py-2 font-mono text-xs font-black uppercase text-black border-2 border-black">
 						<AlertTriangle className="h-4 w-4" />
-						{total} tracked
+						{openTotal} open / {total} tracked
 					</span>
 				</div>
 			</div>
@@ -52,17 +53,27 @@ export default async function AlertsPage() {
 									<p className="mt-1 font-mono text-xs text-neutral-500">
 										{alert.siteName} / {formatDate(alert.createdAt)}
 									</p>
-									<p className="mt-2 inline-flex border border-black bg-neutral-100 px-2 py-1 font-mono text-[10px] font-black uppercase">
+									<p className={`mt-2 inline-flex border border-black px-2 py-1 font-mono text-[10px] font-black uppercase ${alert.resolved ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
 										{alert.resolved ? "Resolved" : "Open"}
 									</p>
 									<p className="mt-3 text-sm text-neutral-700">{alert.message}</p>
 								</div>
-								<Link
-									href={`/dashboard/sites/${alert.siteId}`}
-									className="self-start bg-[#ccff00] px-3 py-2 font-mono text-xs font-black uppercase text-black border-2 border-black"
-								>
-									Inspect
-								</Link>
+								<div className="flex shrink-0 flex-wrap gap-2">
+									<form action={setAlertResolved.bind(null, alert.id, !alert.resolved)}>
+										<button
+											type="submit"
+											className="bg-black px-3 py-2 font-mono text-xs font-black uppercase text-[#ccff00] border-2 border-black"
+										>
+											{alert.resolved ? "Reopen" : "Resolve"}
+										</button>
+									</form>
+									<Link
+										href={`/dashboard/sites/${alert.siteId}`}
+										className="bg-[#ccff00] px-3 py-2 font-mono text-xs font-black uppercase text-black border-2 border-black"
+									>
+										Inspect
+									</Link>
+								</div>
 							</div>
 						</div>
 					))}

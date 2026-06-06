@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { users, sites, sitemaps, urls, checks, submissions, alerts } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 import { stack } from "@/stack";
+import { revalidatePath } from "next/cache";
 
 // Helper to get authenticated user or throw
 async function getAuthUser() {
@@ -376,4 +377,28 @@ export async function submitToIndexNow(siteId: string, urlLoc: string) {
 
 		return { success: false, error: message };
 	}
+}
+
+// 7. Resolve or reopen an alert with an ownership check
+export async function setAlertResolved(alertId: string, resolved: boolean) {
+	const user = await getAuthUser();
+	const [alertRow] = await db
+		.select({
+			id: alerts.id,
+			siteId: alerts.siteId,
+		})
+		.from(alerts)
+		.innerJoin(sites, eq(alerts.siteId, sites.id))
+		.where(and(eq(alerts.id, alertId), eq(sites.userId, user.id)))
+		.limit(1);
+
+	if (!alertRow) {
+		throw new Error("Alert not found");
+	}
+
+	await db.update(alerts).set({ resolved }).where(eq(alerts.id, alertId));
+
+	revalidatePath("/dashboard");
+	revalidatePath("/dashboard/alerts");
+	revalidatePath(`/dashboard/sites/${alertRow.siteId}`);
 }

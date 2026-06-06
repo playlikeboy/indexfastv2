@@ -166,7 +166,7 @@ export async function getSiteDashboard(userId: string, siteId: string) {
 }
 
 export async function getAlertCenter(userId: string) {
-	const [rows, [total]] = await Promise.all([
+	const [rows, [total], [openTotal]] = await Promise.all([
 		db
 			.select({
 				id: alerts.id,
@@ -188,11 +188,17 @@ export async function getAlertCenter(userId: string) {
 			.from(alerts)
 			.innerJoin(sites, eq(alerts.siteId, sites.id))
 			.where(eq(sites.userId, userId)),
+		db
+			.select({ value: sql<number>`cast(count(${alerts.id}) as int)` })
+			.from(alerts)
+			.innerJoin(sites, eq(alerts.siteId, sites.id))
+			.where(and(eq(sites.userId, userId), eq(alerts.resolved, false))),
 	]);
 
 	return {
 		alerts: rows,
 		total: normalizeCount(total?.value),
+		openTotal: normalizeCount(openTotal?.value),
 	};
 }
 
