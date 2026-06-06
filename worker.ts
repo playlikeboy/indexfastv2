@@ -1,23 +1,32 @@
-// @ts-expect-error The OpenNext worker is generated during the build.
+// @ts-ignore The OpenNext worker is generated during the build.
 import handler from "./.open-next/worker.js";
 
 const runtimeEnvKeys = ["DATABASE_URL", "CREDENTIAL_ENCRYPTION_KEY"] as const;
 
 function bindRuntimeEnv(env: CloudflareEnv) {
 	const values = env as unknown as Record<string, string | undefined>;
+	const missing: string[] = [];
 
 	for (const key of runtimeEnvKeys) {
-		if (values[key]) {
-			process.env[key] = values[key];
+		const value = values[key] || process.env[key];
+		if (value) {
+			process.env[key] = value;
+		} else {
+			missing.push(key);
 		}
 	}
+
+	return missing;
 }
 
 export default {
 	fetch: handler.fetch,
 
 	async scheduled(controller, env, ctx) {
-		bindRuntimeEnv(env);
+		const missing = bindRuntimeEnv(env);
+		if (missing.length > 0) {
+			throw new Error(`Scheduled automation requires Cloudflare secrets: ${missing.join(", ")}`);
+		}
 
 		ctx.waitUntil(
 			(async () => {
@@ -32,5 +41,5 @@ export default {
 	},
 } satisfies ExportedHandler<CloudflareEnv>;
 
-// @ts-expect-error The OpenNext worker is generated during the build.
+// @ts-ignore The OpenNext worker is generated during the build.
 export { DOQueueHandler, DOShardedTagCache } from "./.open-next/worker.js";
