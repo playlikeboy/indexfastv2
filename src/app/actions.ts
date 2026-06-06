@@ -18,8 +18,8 @@ import {
 	setAutomationForUser,
 	syncSitemapsForUser,
 	verifyIndexNowForUser,
+	saveIndexNowKeyForUser,
 } from "@/lib/automation/service";
-import { hasCredentialEncryptionKey } from "@/lib/automation/credentials";
 
 async function getAuthUser() {
 	const user = await stack.getUser();
@@ -90,9 +90,7 @@ export async function addSite(domain: string, name: string, sitemapUrl?: string)
 		})
 		.returning();
 
-	if (hasCredentialEncryptionKey()) {
-		await ensureIndexNowIntegration(newSite);
-	}
+	await ensureIndexNowIntegration(newSite);
 	if (cleanSitemapUrl) {
 		await addSitemapSourceForUser(userId, newSite.id, cleanSitemapUrl, true);
 	}
@@ -249,10 +247,18 @@ export async function verifyIndexNowKey(siteId: string) {
 	revalidateSiteDashboard(siteId);
 }
 
+export async function saveIndexNowKey(siteId: string, formData: FormData) {
+	const user = await getAuthUser();
+	const keyLocation = readFormString(formData, "keyLocation");
+	const key = readFormString(formData, "key");
+	await saveIndexNowKeyForUser(user.id, siteId, keyLocation, key);
+	revalidateSiteDashboard(siteId);
+}
+
 export async function saveBingApiKey(siteId: string, formData: FormData) {
 	const user = await getAuthUser();
 	const apiKey = readFormString(formData, "apiKey");
-	await saveBingApiKeyForUser(user.id, apiKey);
+	await saveBingApiKeyForUser(user.id, siteId, apiKey);
 	revalidateSiteDashboard(siteId);
 }
 

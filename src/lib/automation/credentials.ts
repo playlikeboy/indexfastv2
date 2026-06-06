@@ -46,6 +46,14 @@ export async function decryptSecret(value: string) {
 	return decoder.decode(decrypted);
 }
 
+export async function readStoredSecret(value: string) {
+	return value.startsWith(`${secretPrefix}:`) ? decryptSecret(value) : value;
+}
+
+export function storePlainSecret(value: string) {
+	return value.trim();
+}
+
 export function maskCredential(value: string) {
 	if (value.length <= 8) {
 		return "****";

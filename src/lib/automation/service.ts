@@ -13,7 +13,7 @@ import {
 } from "@/db/schema";
 import { getErrorMessage, getSiteHost, normalizeSitemapUrl, normalizeUrlForHost } from "@/lib/url-utils";
 import { AUTOMATION_LIMITS } from "./constants";
-import { decryptSecret, encryptSecret, hasCredentialEncryptionKey, maskCredential } from "./credentials";
+import { maskCredential, readStoredSecret, storePlainSecret } from "./credentials";
 import {
 	generateIndexNowKey,
 	getBingSubmissionQuota,
@@ -40,6 +40,65 @@ function hasLastmodChanged(existing: { lastmod: Date | null }, next: ParsedSitem
 	return !existing.lastmod || existing.lastmod.getTime() !== next.lastmod.getTime();
 }
 
+type IndexNowPublicConfig = {
+	host?: string;
+	keyLocation?: string;
+	storage?: string;
+};
+
+function readPublicConfig(value: unknown): IndexNowPublicConfig {
+	return value && typeof value === "object" ? (value as IndexNowPublicConfig) : {};
+}
+
+function getConfiguredKeyLocation(publicConfig: unknown, host: string, key: string) {
+	const config = readPublicConfig(publicConfig);
+	return config.keyLocation || getIndexNowKeyLocation(host, key);
+}
+
+function normalizeIndexNowKey(key: string) {
+	const cleanKey = key.trim();
+	if (!/^[a-zA-Z0-9-]{8,128}$/.test(cleanKey)) {
+		throw new Error("IndexNow key must be 8-128 characters and contain only letters, numbers, or dashes.");
+	}
+	return cleanKey;
+}
+
+function normalizeIndexNowKeyLocation(keyLocation: string, host: string) {
+	const cleanLocation = keyLocation.trim();
+	if (!cleanLocation) {
+		throw new Error("IndexNow file URL is required.");
+	}
+
+	let url: URL;
+	try {
+		url = new URL(cleanLocation);
+	} catch {
+		throw new Error("Enter a valid IndexNow file URL.");
+	}
+
+	if (url.protocol !== "http:" && url.protocol !== "https:") {
+		throw new Error("IndexNow file URL must use HTTP or HTTPS.");
+	}
+
+	if (url.hostname.toLowerCase() !== host) {
+		throw new Error("IndexNow file URL must belong to the exact site host.");
+	}
+
+	return url.toString();
+}
+
+function getSiteUrl(site: SiteRow) {
+	return `https://${getSiteHost(site)}`;
+}
+
+function describeBingValidationMessage(siteUrl: string, message: string) {
+	if (/InvalidParameter/i.test(message)) {
+		return `Bing returned InvalidParameter for ${siteUrl}. Make sure this exact site URL is added and verified in Bing Webmaster Tools.`;
+	}
+
+	return message;
+}
+
 export async function getSiteForUser(siteId: string, userId: string) {
 	const [site] = await db
 		.select()
@@ -59,22 +118,22 @@ export async function ensureIndexNowIntegration(site: SiteRow) {
 		.limit(1);
 
 	if (existing?.encryptedSecret) {
-		const key = await decryptSecret(existing.encryptedSecret);
-		const keyLocation = getIndexNowKeyLocation(host, key);
+		const key = await readStoredSecret(existing.encryptedSecret);
+		const keyLocation = getConfiguredKeyLocation(existing.publicConfig, host, key);
 		await db
 			.update(siteIntegrations)
 			.set({
-				publicConfig: { host, keyLocation },
+				publicConfig: { host, keyLocation, storage: "plain" },
 				updatedAt: new Date(),
 			})
 			.where(eq(siteIntegrations.id, existing.id));
 
-		return { ...existing, publicConfig: { host, keyLocation }, key, keyLocation };
+		return { ...existing, publicConfig: { host, keyLocation, storage: "plain" }, key, keyLocation };
 	}
 
 	const key = generateIndexNowKey();
 	const keyLocation = getIndexNowKeyLocation(host, key);
-	const encryptedSecret = await encryptSecret(key);
+	const storedSecret = storePlainSecret(key);
 
 	const [integration] = await db
 		.insert(siteIntegrations)
@@ -82,15 +141,15 @@ export async function ensureIndexNowIntegration(site: SiteRow) {
 			siteId: site.id,
 			provider: "indexnow",
 			status: "pending",
-			encryptedSecret,
-			publicConfig: { host, keyLocation },
+			encryptedSecret: storedSecret,
+			publicConfig: { host, keyLocation, storage: "plain" },
 			automationEnabled: false,
 		})
 		.onConflictDoUpdate({
 			target: [siteIntegrations.siteId, siteIntegrations.provider],
 			set: {
-				encryptedSecret,
-				publicConfig: { host, keyLocation },
+				encryptedSecret: storedSecret,
+				publicConfig: { host, keyLocation, storage: "plain" },
 				updatedAt: new Date(),
 			},
 		})
@@ -109,11 +168,12 @@ async function getIndexNowSettings(site: SiteRow) {
 
 	if (existing?.encryptedSecret) {
 		try {
-			const key = await decryptSecret(existing.encryptedSecret);
+			const key = await readStoredSecret(existing.encryptedSecret);
+			const keyLocation = getConfiguredKeyLocation(existing.publicConfig, host, key);
 			return {
 				status: existing.status,
 				key,
-				keyLocation: getIndexNowKeyLocation(host, key),
+				keyLocation,
 				verifiedAt: existing.verifiedAt,
 				lastCheckedAt: existing.lastCheckedAt,
 				lastErrorMessage: existing.lastErrorMessage,
@@ -132,18 +192,6 @@ async function getIndexNowSettings(site: SiteRow) {
 		}
 	}
 
-	if (!hasCredentialEncryptionKey()) {
-		return {
-			status: "missing_secret",
-			key: null,
-			keyLocation: null,
-			verifiedAt: null,
-			lastCheckedAt: null,
-			lastErrorMessage: "Set CREDENTIAL_ENCRYPTION_KEY to generate and verify an IndexNow key.",
-			automationEnabled: false,
-		};
-	}
-
 	const integration = await ensureIndexNowIntegration(site);
 	return {
 		status: integration.status,
@@ -156,6 +204,43 @@ async function getIndexNowSettings(site: SiteRow) {
 	};
 }
 
+export async function saveIndexNowKeyForUser(userId: string, siteId: string, keyLocation: string, key: string) {
+	const site = await getSiteForUser(siteId, userId);
+	if (!site) {
+		throw new Error("Site not found");
+	}
+
+	const host = getSiteHost(site);
+	const cleanKey = normalizeIndexNowKey(key);
+	const cleanKeyLocation = normalizeIndexNowKeyLocation(keyLocation, host);
+	const now = new Date();
+
+	await db
+		.insert(siteIntegrations)
+		.values({
+			siteId,
+			provider: "indexnow",
+			status: "pending",
+			encryptedSecret: storePlainSecret(cleanKey),
+			publicConfig: { host, keyLocation: cleanKeyLocation, storage: "plain" },
+			automationEnabled: false,
+		})
+		.onConflictDoUpdate({
+			target: [siteIntegrations.siteId, siteIntegrations.provider],
+			set: {
+				status: "pending",
+				encryptedSecret: storePlainSecret(cleanKey),
+				publicConfig: { host, keyLocation: cleanKeyLocation, storage: "plain" },
+				verifiedAt: null,
+				lastCheckedAt: null,
+				lastErrorAt: null,
+				lastErrorMessage: null,
+				automationEnabled: false,
+				updatedAt: now,
+			},
+		});
+}
+
 export async function verifyIndexNowForUser(userId: string, siteId: string) {
 	const site = await getSiteForUser(siteId, userId);
 	if (!site) {
@@ -163,7 +248,7 @@ export async function verifyIndexNowForUser(userId: string, siteId: string) {
 	}
 
 	const integration = await ensureIndexNowIntegration(site);
-	const result = await verifyIndexNowKey(getSiteHost(site), integration.key);
+	const result = await verifyIndexNowKey(getSiteHost(site), integration.key, integration.keyLocation);
 	const now = new Date();
 
 	await db
@@ -174,7 +259,7 @@ export async function verifyIndexNowForUser(userId: string, siteId: string) {
 			lastCheckedAt: now,
 			lastErrorAt: result.ok ? null : now,
 			lastErrorMessage: result.ok ? null : truncateMessage(result.message),
-			publicConfig: { host: getSiteHost(site), keyLocation: result.keyLocation },
+			publicConfig: { host: getSiteHost(site), keyLocation: result.keyLocation, storage: "plain" },
 			updatedAt: now,
 		})
 		.where(eq(siteIntegrations.id, integration.id));
@@ -182,16 +267,23 @@ export async function verifyIndexNowForUser(userId: string, siteId: string) {
 	return result;
 }
 
-export async function saveBingApiKeyForUser(userId: string, apiKey: string) {
+export async function saveBingApiKeyForUser(userId: string, siteId: string, apiKey: string) {
+	const site = await getSiteForUser(siteId, userId);
+	if (!site) {
+		throw new Error("Site not found");
+	}
+
 	const cleanApiKey = apiKey.trim();
 	if (!cleanApiKey) {
 		throw new Error("Bing API key is required");
 	}
 
-	const validation = await getBingSubmissionQuota(cleanApiKey);
+	const siteUrl = getSiteUrl(site);
+	const validation = await getBingSubmissionQuota(cleanApiKey, siteUrl);
 	const now = new Date();
-	const encryptedSecret = await encryptSecret(cleanApiKey);
+	const storedSecret = storePlainSecret(cleanApiKey);
 	const status = validation.ok ? "verified" : "failed";
+	const validationMessage = describeBingValidationMessage(siteUrl, validation.message);
 
 	await db
 		.insert(userIntegrations)
@@ -199,23 +291,23 @@ export async function saveBingApiKeyForUser(userId: string, apiKey: string) {
 			userId,
 			provider: "bing",
 			status,
-			encryptedSecret,
-			publicConfig: { lastValidationStatus: validation.status },
+			encryptedSecret: storedSecret,
+			publicConfig: { lastValidationStatus: validation.status, siteUrl, storage: "plain" },
 			verifiedAt: validation.ok ? now : null,
 			lastCheckedAt: now,
 			lastErrorAt: validation.ok ? null : now,
-			lastErrorMessage: validation.ok ? null : truncateMessage(validation.message),
+			lastErrorMessage: validation.ok ? null : truncateMessage(validationMessage),
 		})
 		.onConflictDoUpdate({
 			target: [userIntegrations.userId, userIntegrations.provider],
 			set: {
 				status,
-				encryptedSecret,
-				publicConfig: { lastValidationStatus: validation.status },
+				encryptedSecret: storedSecret,
+				publicConfig: { lastValidationStatus: validation.status, siteUrl, storage: "plain" },
 				verifiedAt: validation.ok ? now : null,
 				lastCheckedAt: now,
 				lastErrorAt: validation.ok ? null : now,
-				lastErrorMessage: validation.ok ? null : truncateMessage(validation.message),
+				lastErrorMessage: validation.ok ? null : truncateMessage(validationMessage),
 				updatedAt: now,
 			},
 		});
@@ -667,8 +759,9 @@ async function submitEngineBatch(siteId: string, engine: string, urlList: string
 			return { ok: false, status: 0, message: "IndexNow key is not verified." };
 		}
 
-		const key = await decryptSecret(integration.encryptedSecret);
-		return submitIndexNowBatch(getSiteHost(site), key, urlList);
+		const key = await readStoredSecret(integration.encryptedSecret);
+		const keyLocation = getConfiguredKeyLocation(integration.publicConfig, getSiteHost(site), key);
+		return submitIndexNowBatch(getSiteHost(site), key, urlList, keyLocation);
 	}
 
 	if (engine === "bing") {
@@ -682,8 +775,8 @@ async function submitEngineBatch(siteId: string, engine: string, urlList: string
 			return { ok: false, status: 0, message: "Bing API key is not verified." };
 		}
 
-		const apiKey = await decryptSecret(integration.encryptedSecret);
-		return submitBingBatch(apiKey, `https://${getSiteHost(site)}`, urlList);
+		const apiKey = await readStoredSecret(integration.encryptedSecret);
+		return submitBingBatch(apiKey, getSiteUrl(site), urlList);
 	}
 
 	return { ok: false, status: 0, message: `Unsupported submission engine: ${engine}.` };
@@ -853,7 +946,7 @@ export async function getSiteSettings(userId: string, siteId: string) {
 	let bingErrorMessage = bingIntegration?.lastErrorMessage ?? null;
 	if (bingIntegration) {
 		try {
-			bingKey = await decryptSecret(bingIntegration.encryptedSecret);
+			bingKey = await readStoredSecret(bingIntegration.encryptedSecret);
 		} catch (error) {
 			bingErrorMessage = `Unable to decrypt Bing key: ${getErrorMessage(error)}`;
 		}

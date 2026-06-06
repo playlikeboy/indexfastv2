@@ -6,6 +6,7 @@ import {
 	discoverSitemapSources,
 	removeBingApiKey,
 	saveBingApiKey,
+	saveIndexNowKey,
 	saveSitemapSource,
 	syncSitemap,
 	toggleSiteAutomation,
@@ -184,29 +185,40 @@ export default async function SiteSettingsPage({ params, searchParams }: Setting
 							<h3 className="text-xl font-black uppercase tracking-tight">IndexNow Key</h3>
 							<StatusBadge status={settings.indexNow.status} />
 						</div>
-						<div className="mt-5 space-y-4 font-mono text-sm">
+						<form action={saveIndexNowKey.bind(null, siteId)} className="mt-5 space-y-4">
 							<div>
-								<p className="mb-1 text-xs font-bold uppercase text-muted">File URL</p>
-								<div className="overflow-x-auto rounded-md border border-border bg-surface p-3 text-xs">
-									{settings.indexNow.keyLocation || "Set CREDENTIAL_ENCRYPTION_KEY to generate a key location."}
-								</div>
+								<label className="mb-1 block font-mono text-xs font-bold uppercase text-muted">File URL</label>
+								<input
+									name="keyLocation"
+									type="url"
+									defaultValue={settings.indexNow.keyLocation || ""}
+									placeholder={`https://${settings.site.domain}/${settings.indexNow.key || "your-key"}.txt`}
+									className="w-full rounded-md border border-border bg-surface p-2.5 font-mono text-sm text-ink outline-none transition-colors focus:border-ink"
+									required
+								/>
 							</div>
 							<div>
-								<p className="mb-1 text-xs font-bold uppercase text-muted">File content</p>
-								<div className="overflow-x-auto rounded-md border border-border bg-surface p-3 text-xs">
-									{settings.indexNow.key || "Set CREDENTIAL_ENCRYPTION_KEY to generate a key."}
-								</div>
+								<label className="mb-1 block font-mono text-xs font-bold uppercase text-muted">File content</label>
+								<input
+									name="key"
+									type="text"
+									defaultValue={settings.indexNow.key || ""}
+									placeholder="Your existing IndexNow key"
+									className="w-full rounded-md border border-border bg-surface p-2.5 font-mono text-sm text-ink outline-none transition-colors focus:border-ink"
+									required
+								/>
 							</div>
-						</div>
-						{hasIndexNowKey ? (
-							<p className="mt-4 text-sm text-muted">
-								Host a text file at the URL above with the key as the entire file content, then verify it here.
-							</p>
-						) : (
-							<p className="mt-4 text-sm text-muted">
-								Add `CREDENTIAL_ENCRYPTION_KEY` to the runtime environment, restart the app, then refresh this page.
-							</p>
-						)}
+							<button className="rounded-md border border-border bg-surface px-4 py-3 font-mono text-xs font-black uppercase text-ink transition-colors hover:border-ink">
+								Save key setup
+							</button>
+						</form>
+						<p className="mt-4 text-sm text-muted">
+							Already configured IndexNow elsewhere? Paste that same key file URL and key content here.{" "}
+							<Link href="/blog/indexnow-key-setup" className="font-semibold text-ink underline underline-offset-4">
+								Read the IndexNow key guide
+							</Link>
+							.
+						</p>
 					</div>
 					<div className="rounded-md border border-border bg-card p-5">
 						<h3 className="text-lg font-black uppercase tracking-tight">Verification</h3>
@@ -234,6 +246,11 @@ export default async function SiteSettingsPage({ params, searchParams }: Setting
 						</div>
 						<p className="mt-4 text-sm text-muted">
 							Direct Bing API is optional. IndexNow remains the default submission engine for automated signaling.
+							{" "}
+							<Link href="/blog/bing-webmaster-api-key" className="font-semibold text-ink underline underline-offset-4">
+								Read the Bing API key guide
+							</Link>
+							.
 						</p>
 						{settings.bing ? (
 							<div className="mt-5 rounded-md border border-border bg-surface p-4">

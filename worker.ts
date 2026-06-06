@@ -1,7 +1,7 @@
 // @ts-ignore The OpenNext worker is generated during the build.
 import handler from "./.open-next/worker.js";
 
-const runtimeEnvKeys = ["DATABASE_URL", "CREDENTIAL_ENCRYPTION_KEY"] as const;
+const runtimeEnvKeys = ["DATABASE_URL"] as const;
 
 function bindRuntimeEnv(env: CloudflareEnv) {
 	const values = env as unknown as Record<string, string | undefined>;

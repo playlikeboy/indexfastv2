@@ -33,6 +33,11 @@ function readTag(block: string, tag: string) {
 	return match ? decodeXml(match[1]) : null;
 }
 
+function readAttribute(tag: string, attribute: string) {
+	const match = new RegExp(`${attribute}=["']([^"']+)["']`, "i").exec(tag);
+	return match ? decodeXml(match[1]) : null;
+}
+
 function parseDate(value: string | null) {
 	if (!value) {
 		return null;
@@ -84,6 +89,35 @@ export function parseSitemapXml(xml: string, host: string): ParsedSitemap {
 		});
 	}
 
+	for (const match of xml.matchAll(/<(?:[\w-]+:)?item\b[^>]*>([\s\S]*?)<\/(?:[\w-]+:)?item>/gi)) {
+		const loc = normalizeUrlOnHost(readTag(match[1], "link"), host);
+		if (!loc) {
+			continue;
+		}
+
+		urls.set(loc, {
+			loc,
+			lastmod: parseDate(readTag(match[1], "pubDate")),
+			changefreq: null,
+			priority: null,
+		});
+	}
+
+	for (const match of xml.matchAll(/<(?:[\w-]+:)?entry\b[^>]*>([\s\S]*?)<\/(?:[\w-]+:)?entry>/gi)) {
+		const linkTag = /<(?:[\w-]+:)?link\b[^>]*>/i.exec(match[1])?.[0] ?? "";
+		const loc = normalizeUrlOnHost(readAttribute(linkTag, "href") || readTag(match[1], "id"), host);
+		if (!loc) {
+			continue;
+		}
+
+		urls.set(loc, {
+			loc,
+			lastmod: parseDate(readTag(match[1], "updated") || readTag(match[1], "published")),
+			changefreq: null,
+			priority: null,
+		});
+	}
+
 	return { sitemaps: Array.from(sitemaps), urls: Array.from(urls.values()) };
 }
 
@@ -95,6 +129,31 @@ async function fetchText(url: string, userAgent: string) {
 		throw new Error(`${url} returned HTTP ${response.status}`);
 	}
 	return response.text();
+}
+
+async function fetchCandidateSource(url: string, host: string) {
+	try {
+		const response = await fetch(url, {
+			headers: { "User-Agent": "IndexFast Sitemap Discoverer/1.0" },
+		});
+		if (!response.ok) {
+			return null;
+		}
+
+		const text = await response.text();
+		if (!text.trim().startsWith("<")) {
+			return null;
+		}
+
+		const parsed = parseSitemapXml(text, host);
+		if (parsed.sitemaps.length === 0 && parsed.urls.length === 0) {
+			return null;
+		}
+
+		return url;
+	} catch {
+		return null;
+	}
 }
 
 export async function fetchSitemapTree(
@@ -140,21 +199,48 @@ export async function fetchSitemapTree(
 
 export async function discoverSitemapUrls(host: string) {
 	const discovered = new Set<string>();
+	const candidates = new Set<string>();
 
 	try {
 		const robots = await fetchText(`https://${host}/robots.txt`, "IndexFast Sitemap Discoverer/1.0");
 		for (const match of robots.matchAll(/^sitemap:\s*(\S+)/gim)) {
 			const loc = normalizeUrlOnHost(match[1], host);
 			if (loc) {
-				discovered.add(loc);
+				candidates.add(loc);
 			}
 		}
 	} catch {
 		// robots.txt is optional; common sitemap paths below cover the usual fallback.
 	}
 
-	for (const path of ["/sitemap.xml", "/sitemap_index.xml", "/sitemap-index.xml"]) {
-		discovered.add(`https://${host}${path}`);
+	for (const path of [
+		"/sitemap.xml",
+		"/sitemap_index.xml",
+		"/sitemap-index.xml",
+		"/wp-sitemap.xml",
+		"/post-sitemap.xml",
+		"/page-sitemap.xml",
+		"/category-sitemap.xml",
+		"/product-sitemap.xml",
+		"/news-sitemap.xml",
+		"/image-sitemap.xml",
+		"/video-sitemap.xml",
+		"/sitemap/sitemap.xml",
+		"/rss.xml",
+		"/feed.xml",
+		"/feeds.xml",
+		"/atom.xml",
+		"/rss",
+		"/feed",
+	]) {
+		candidates.add(`https://${host}${path}`);
+	}
+
+	for (const candidate of candidates) {
+		const validSource = await fetchCandidateSource(candidate, host);
+		if (validSource) {
+			discovered.add(validSource);
+		}
 	}
 
 	return Array.from(discovered);

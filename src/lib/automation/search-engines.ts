@@ -15,17 +15,16 @@ export function getIndexNowKeyLocation(host: string, key: string) {
 	return `https://${host}/${key}.txt`;
 }
 
-export function buildIndexNowPayload(host: string, key: string, urls: string[]) {
+export function buildIndexNowPayload(host: string, key: string, urls: string[], keyLocation = getIndexNowKeyLocation(host, key)) {
 	return {
 		host,
 		key,
-		keyLocation: getIndexNowKeyLocation(host, key),
+		keyLocation,
 		urlList: urls,
 	};
 }
 
-export async function verifyIndexNowKey(host: string, key: string) {
-	const keyLocation = getIndexNowKeyLocation(host, key);
+export async function verifyIndexNowKey(host: string, key: string, keyLocation = getIndexNowKeyLocation(host, key)) {
 	const response = await fetch(keyLocation, {
 		headers: { "User-Agent": "IndexFast IndexNow Verifier/1.0" },
 	});
@@ -39,11 +38,11 @@ export async function verifyIndexNowKey(host: string, key: string) {
 	};
 }
 
-export async function submitIndexNowBatch(host: string, key: string, urls: string[]): Promise<EngineSubmissionResult> {
+export async function submitIndexNowBatch(host: string, key: string, urls: string[], keyLocation?: string): Promise<EngineSubmissionResult> {
 	const response = await fetch(INDEXNOW_ENDPOINT, {
 		method: "POST",
 		headers: { "Content-Type": "application/json; charset=utf-8" },
-		body: JSON.stringify(buildIndexNowPayload(host, key, urls)),
+		body: JSON.stringify(buildIndexNowPayload(host, key, urls, keyLocation)),
 	});
 	const message = await response.text().catch(() => "");
 
@@ -61,8 +60,8 @@ export function buildBingBatchPayload(siteUrl: string, urls: string[]) {
 	};
 }
 
-export async function getBingSubmissionQuota(apiKey: string): Promise<EngineSubmissionResult> {
-	const endpoint = `${BING_API_BASE}/GetUrlSubmissionQuota?apikey=${encodeURIComponent(apiKey)}`;
+export async function getBingSubmissionQuota(apiKey: string, siteUrl: string): Promise<EngineSubmissionResult> {
+	const endpoint = `${BING_API_BASE}/GetUrlSubmissionQuota?siteUrl=${encodeURIComponent(siteUrl)}&apikey=${encodeURIComponent(apiKey)}`;
 	const response = await fetch(endpoint, {
 		headers: { "User-Agent": "IndexFast Bing API Validator/1.0" },
 	});
