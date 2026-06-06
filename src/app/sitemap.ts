@@ -30,6 +30,30 @@ export default function sitemap(): MetadataRoute.Sitemap {
 			priority: 0.8,
 		},
 		{
+			url: `${SITE_URL}/resources`,
+			lastModified: new Date(),
+			changeFrequency: "weekly",
+			priority: 0.85,
+		},
+		{
+			url: `${SITE_URL}/resources/directories`,
+			lastModified: new Date(),
+			changeFrequency: "weekly",
+			priority: 0.8,
+		},
+		{
+			url: `${SITE_URL}/resources/tools`,
+			lastModified: new Date(),
+			changeFrequency: "weekly",
+			priority: 0.75,
+		},
+		{
+			url: `${SITE_URL}/resources/skill`,
+			lastModified: new Date(),
+			changeFrequency: "monthly",
+			priority: 0.65,
+		},
+		{
 			url: `${SITE_URL}/about`,
 			lastModified: new Date(),
 			changeFrequency: "monthly",

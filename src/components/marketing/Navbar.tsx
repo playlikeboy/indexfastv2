@@ -27,24 +27,31 @@ export function Navbar() {
 				<div className="hidden items-center gap-7 md:flex">
 					<a href="#features" className="text-sm text-muted transition-colors hover:text-ink">Features</a>
 					<Link href="/tools" className="text-sm text-muted transition-colors hover:text-ink">Tools</Link>
+					<Link href="/resources" className="text-sm text-muted transition-colors hover:text-ink">Resources</Link>
 					<a href="#pricing" className="text-sm text-muted transition-colors hover:text-ink">Pricing</a>
 					<a href="/blog" className="text-sm text-muted transition-colors hover:text-ink">Blog</a>
-					<Link href="/login" className="text-sm text-muted transition-colors hover:text-ink">Login</Link>
+					<Link href="/dashboard" className="text-sm text-muted transition-colors hover:text-ink">Dashboard</Link>
 					<ThemeToggle />
 					<Link
-						href="#cta"
+						href="/signup"
 						className="bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground transition-colors hover:bg-accent-dark"
 					>
-						Run free audit
+						Start free
 					</Link>
 				</div>
 				<div className="flex items-center gap-2 md:hidden">
 					<ThemeToggle />
 					<Link
-						href="#cta"
+						href="/dashboard"
+						className="border border-border px-3 py-1.5 text-sm font-semibold text-ink"
+					>
+						Dashboard
+					</Link>
+					<Link
+						href="/signup"
 						className="bg-accent px-3 py-1.5 text-sm font-semibold text-accent-foreground"
 					>
-						Run free audit
+						Start
 					</Link>
 				</div>
 			</div>

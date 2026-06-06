@@ -20,6 +20,8 @@ import {
 	verifyIndexNowForUser,
 	saveIndexNowKeyForUser,
 } from "@/lib/automation/service";
+import { createApiKeyForUser, revokeApiKeyForUser } from "@/lib/platform/api-keys";
+import { DEFAULT_API_SCOPES, normalizeApiScopes } from "@/lib/platform/plans";
 
 async function getAuthUser() {
 	const user = await stack.getUser();
@@ -273,6 +275,23 @@ export async function toggleSiteAutomation(siteId: string, formData: FormData) {
 	const enabled = readFormString(formData, "enabled") === "true";
 	await setAutomationForUser(user.id, siteId, enabled);
 	revalidateSiteDashboard(siteId);
+}
+
+export async function createDashboardApiKey(formData: FormData) {
+	const userId = await syncUser();
+	const name = readFormString(formData, "name") || "IndexFast API key";
+	const requestedScopes = normalizeApiScopes(formData.getAll("scopes"));
+	const apiKey = await createApiKeyForUser(userId, name, requestedScopes.length > 0 ? requestedScopes : DEFAULT_API_SCOPES);
+	revalidatePath("/dashboard/api-keys");
+	revalidatePath("/dashboard/mcp");
+	return apiKey;
+}
+
+export async function revokeDashboardApiKey(apiKeyId: string) {
+	const user = await getAuthUser();
+	await revokeApiKeyForUser(user.id, apiKeyId);
+	revalidatePath("/dashboard/api-keys");
+	revalidatePath("/dashboard/mcp");
 }
 
 export async function setAlertResolved(alertId: string, resolved: boolean) {

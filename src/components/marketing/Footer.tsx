@@ -55,7 +55,9 @@ export function Footer() {
 						<ul className="mt-4 space-y-2.5">
 							<li><a href="#features" className="text-sm text-muted transition-colors hover:text-ink">Features</a></li>
 							<li><a href="#pricing" className="text-sm text-muted transition-colors hover:text-ink">Pricing</a></li>
+							<li><Link href="/dashboard" className="text-sm text-muted transition-colors hover:text-ink">Dashboard</Link></li>
 							<li><Link href="/tools" className="text-sm text-muted transition-colors hover:text-ink">Free Tools</Link></li>
+							<li><Link href="/resources" className="text-sm text-muted transition-colors hover:text-ink">Resources</Link></li>
 							<li><a href="/blog" className="text-sm text-muted transition-colors hover:text-ink">Blog</a></li>
 						</ul>
 					</div>
