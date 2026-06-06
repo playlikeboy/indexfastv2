@@ -2,13 +2,14 @@ import React from "react";
 import { stack } from "@/stack";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { AlertTriangle, Globe, KeyRound, LayoutDashboard, LogOut, Send, Settings, Terminal } from "lucide-react";
+import { AlertTriangle, CreditCard, Globe, KeyRound, LayoutDashboard, LogOut, Send, Settings, Terminal } from "lucide-react";
 import { ThemeToggle } from "@/components/marketing/ThemeToggle";
 
 const navItems = [
 	{ href: "/dashboard", label: "Overview", icon: LayoutDashboard },
 	{ href: "/dashboard/submissions", label: "Submissions", icon: Send },
 	{ href: "/dashboard/alerts", label: "Alert Center", icon: AlertTriangle },
+	{ href: "/dashboard/billing", label: "Billing", icon: CreditCard },
 	{ href: "/dashboard/api-keys", label: "API Keys", icon: KeyRound },
 	{ href: "/dashboard/mcp", label: "MCP Setup", icon: Terminal },
 	{ href: "/tools", label: "Free SEO Tools", icon: Globe },

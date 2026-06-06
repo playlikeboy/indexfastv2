@@ -22,7 +22,7 @@ and a Cloudflare Worker cron job that runs automation in the background.
 | Free SEO tools | `/tools/*` (12 tools) | No-signup utilities — index checkers, sitemap extractor, IndexNow key generator, llms.txt generator, AI crawler checker, etc. |
 | Resources | `/resources`, `/resources/directories`, `/resources/tools`, `/resources/skill`, `/resources/google-indexing-api` | Free SEO resources, 100+ prioritized directories, third-party tools, downloadable SKILL.md, Google API guardrails |
 | Auth (Stack Auth) | `/handler/[...stack]`, `/login`, `/signup` | Sign-in / sign-up / account screens |
-| Dashboard | `/dashboard`, `/dashboard/sites/[siteId]`, `/dashboard/sites/[siteId]/settings`, `/dashboard/submissions`, `/dashboard/alerts`, `/dashboard/api-keys`, `/dashboard/mcp` | Protected app: connect sites, configure sitemaps, manage IndexNow + Bing, create API keys, configure MCP, view logs & alerts |
+| Dashboard | `/dashboard`, `/dashboard/sites/[siteId]`, `/dashboard/sites/[siteId]/settings`, `/dashboard/submissions`, `/dashboard/alerts`, `/dashboard/billing`, `/dashboard/api-keys`, `/dashboard/mcp` | Protected app: connect sites, configure sitemaps, manage IndexNow + Bing, create API keys, manage billing, configure MCP, view logs & alerts |
 | REST API | `/api/v1/*` | Bearer API-key interface for sites, sitemaps, URLs, submissions, diagnostics, and resources |
 | MCP | `/api/mcp` | Authenticated JSON-RPC MCP server for AI IDEs and agent harnesses |
 | Billing | `/api/checkout`, `/api/customer-portal`, `/api/webhooks/dodo` | DodoPayments checkout, customer portal, and webhook ingestion |
@@ -123,6 +123,7 @@ bun run preview            # build + wrangler preview
     │   └── dashboard/
     │       ├── layout.tsx      # auth-guarded, sidebar nav, user email, theme toggle
     │       ├── page.tsx        # overview: site list + stats + AddSiteForm
+    │       ├── billing/page.tsx
     │       ├── api-keys/page.tsx
     │       ├── mcp/page.tsx
     │       ├── alerts/page.tsx

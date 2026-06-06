@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { billingCustomers, billingEvents, subscriptions, users } from "@/db/schema";
 import { normalizeBillingTier, type BillingTier } from "./plans";
@@ -57,19 +57,21 @@ function getMetadata(data: Record<string, unknown>) {
 }
 
 export async function getCurrentBilling(userId: string) {
-	const [user, subscription] = await Promise.all([
+	const [user, subscription, customer] = await Promise.all([
 		db.select({ billingTier: users.billingTier }).from(users).where(eq(users.id, userId)).limit(1),
 		db
 			.select()
 			.from(subscriptions)
 			.where(eq(subscriptions.userId, userId))
-			.orderBy(subscriptions.updatedAt)
+			.orderBy(desc(subscriptions.updatedAt))
 			.limit(1),
+		db.select().from(billingCustomers).where(eq(billingCustomers.userId, userId)).limit(1),
 	]);
 
 	return {
 		billingTier: normalizeBillingTier(user[0]?.billingTier),
 		subscription: subscription[0] || null,
+		customer: customer[0] || null,
 	};
 }
 
