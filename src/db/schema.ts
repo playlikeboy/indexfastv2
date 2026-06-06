@@ -6,11 +6,120 @@ export const users = pgTable(
 	{
 		id: text("id").primaryKey(), // Stack Auth user ID
 		email: text("email").notNull(),
-		billingTier: text("billing_tier").default("free").notNull(), // 'free', 'pro', 'agency'
+		billingTier: text("billing_tier").default("free").notNull(), // 'free', 'indie', 'growth', 'agency', 'scale'
 		createdAt: timestamp("created_at").defaultNow().notNull(),
 		updatedAt: timestamp("updated_at").defaultNow().notNull(),
 	},
 	(table) => [index("users_email_idx").on(table.email)],
+);
+
+// Hashed IndexFast API keys for REST, MCP, and CLI access
+export const apiKeys = pgTable(
+	"api_keys",
+	{
+		id: uuid("id").primaryKey().defaultRandom(),
+		userId: text("user_id")
+			.references(() => users.id, { onDelete: "cascade" })
+			.notNull(),
+		name: text("name").notNull(),
+		keyPrefix: text("key_prefix").notNull(),
+		keyHash: text("key_hash").notNull(),
+		scopes: jsonb("scopes").notNull(),
+		status: text("status").default("active").notNull(), // 'active', 'revoked'
+		lastUsedAt: timestamp("last_used_at"),
+		expiresAt: timestamp("expires_at"),
+		revokedAt: timestamp("revoked_at"),
+		createdAt: timestamp("created_at").defaultNow().notNull(),
+		updatedAt: timestamp("updated_at").defaultNow().notNull(),
+	},
+	(table) => [
+		index("api_keys_user_id_idx").on(table.userId),
+		index("api_keys_status_idx").on(table.status),
+		uniqueIndex("api_keys_key_hash_unique_idx").on(table.keyHash),
+	],
+);
+
+// API/MCP/CLI usage events for billing gates, debugging, and audit history
+export const apiUsageEvents = pgTable(
+	"api_usage_events",
+	{
+		id: uuid("id").primaryKey().defaultRandom(),
+		apiKeyId: uuid("api_key_id").references(() => apiKeys.id, { onDelete: "set null" }),
+		userId: text("user_id")
+			.references(() => users.id, { onDelete: "cascade" })
+			.notNull(),
+		method: text("method").notNull(),
+		route: text("route").notNull(),
+		statusCode: integer("status_code").notNull(),
+		metadata: jsonb("metadata"),
+		createdAt: timestamp("created_at").defaultNow().notNull(),
+	},
+	(table) => [
+		index("api_usage_events_user_created_idx").on(table.userId, table.createdAt),
+		index("api_usage_events_key_created_idx").on(table.apiKeyId, table.createdAt),
+	],
+);
+
+// DodoPayments customer records mapped to Stack users
+export const billingCustomers = pgTable(
+	"billing_customers",
+	{
+		id: uuid("id").primaryKey().defaultRandom(),
+		userId: text("user_id")
+			.references(() => users.id, { onDelete: "cascade" })
+			.notNull(),
+		dodoCustomerId: text("dodo_customer_id").notNull(),
+		email: text("email").notNull(),
+		createdAt: timestamp("created_at").defaultNow().notNull(),
+		updatedAt: timestamp("updated_at").defaultNow().notNull(),
+	},
+	(table) => [
+		uniqueIndex("billing_customers_user_unique_idx").on(table.userId),
+		uniqueIndex("billing_customers_dodo_customer_unique_idx").on(table.dodoCustomerId),
+	],
+);
+
+// Active and historical subscription state from DodoPayments webhooks
+export const subscriptions = pgTable(
+	"subscriptions",
+	{
+		id: uuid("id").primaryKey().defaultRandom(),
+		userId: text("user_id")
+			.references(() => users.id, { onDelete: "cascade" })
+			.notNull(),
+		dodoSubscriptionId: text("dodo_subscription_id").notNull(),
+		dodoProductId: text("dodo_product_id"),
+		plan: text("plan").default("free").notNull(), // 'free', 'indie', 'growth', 'agency', 'scale'
+		status: text("status").default("inactive").notNull(),
+		currentPeriodStart: timestamp("current_period_start"),
+		currentPeriodEnd: timestamp("current_period_end"),
+		cancelAtPeriodEnd: boolean("cancel_at_period_end").default(false).notNull(),
+		createdAt: timestamp("created_at").defaultNow().notNull(),
+		updatedAt: timestamp("updated_at").defaultNow().notNull(),
+	},
+	(table) => [
+		index("subscriptions_user_id_idx").on(table.userId),
+		index("subscriptions_status_idx").on(table.status),
+		uniqueIndex("subscriptions_dodo_subscription_unique_idx").on(table.dodoSubscriptionId),
+	],
+);
+
+// Raw Dodo webhook event ledger for idempotency and debugging
+export const billingEvents = pgTable(
+	"billing_events",
+	{
+		id: uuid("id").primaryKey().defaultRandom(),
+		eventId: text("event_id").notNull(),
+		eventType: text("event_type").notNull(),
+		userId: text("user_id").references(() => users.id, { onDelete: "set null" }),
+		payload: jsonb("payload").notNull(),
+		processedAt: timestamp("processed_at"),
+		createdAt: timestamp("created_at").defaultNow().notNull(),
+	},
+	(table) => [
+		uniqueIndex("billing_events_event_unique_idx").on(table.eventId),
+		index("billing_events_user_created_idx").on(table.userId, table.createdAt),
+	],
 );
 
 // Websites being monitored by users
@@ -112,6 +221,32 @@ export const userIntegrations = pgTable(
 		index("user_integrations_user_id_idx").on(table.userId),
 		index("user_integrations_user_status_idx").on(table.userId, table.status),
 		uniqueIndex("user_integrations_user_provider_unique_idx").on(table.userId, table.provider),
+	],
+);
+
+// Optional Google Indexing API setup, limited to eligible job/livestream URLs
+export const googleIntegrations = pgTable(
+	"google_integrations",
+	{
+		id: uuid("id").primaryKey().defaultRandom(),
+		siteId: uuid("site_id")
+			.references(() => sites.id, { onDelete: "cascade" })
+			.notNull(),
+		status: text("status").default("pending").notNull(), // 'pending', 'verified', 'failed', 'disabled'
+		credentialsJson: text("credentials_json"),
+		eligibleContentTypes: jsonb("eligible_content_types").notNull(),
+		publicConfig: jsonb("public_config"),
+		verifiedAt: timestamp("verified_at"),
+		lastCheckedAt: timestamp("last_checked_at"),
+		lastErrorAt: timestamp("last_error_at"),
+		lastErrorMessage: text("last_error_message"),
+		createdAt: timestamp("created_at").defaultNow().notNull(),
+		updatedAt: timestamp("updated_at").defaultNow().notNull(),
+	},
+	(table) => [
+		index("google_integrations_site_id_idx").on(table.siteId),
+		index("google_integrations_status_idx").on(table.status),
+		uniqueIndex("google_integrations_site_unique_idx").on(table.siteId),
 	],
 );
 

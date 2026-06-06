@@ -22,6 +22,13 @@
       "when": 1780715857267,
       "tag": "0002_add_automation_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1780770095860,
+      "tag": "0003_cold_thundra",
+      "breakpoints": true
     }
   ]
 }
