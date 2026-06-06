@@ -2,7 +2,7 @@ import Link from "next/link";
 import { revalidatePath } from "next/cache";
 import { notFound } from "next/navigation";
 import { AlertTriangle, Database, Globe, Send } from "lucide-react";
-import { syncSitemap, verifySite } from "@/app/actions";
+import { checkUrlDiagnostics, submitToIndexNow, syncSitemap, verifySite } from "@/app/actions";
 import { getSiteDashboard } from "@/db/dashboard";
 import { stack } from "@/stack";
 
@@ -44,6 +44,21 @@ export default async function SiteDetailPage({ params }: SiteDetailPageProps) {
 		"use server";
 		await syncSitemap(siteId);
 		revalidatePath("/dashboard");
+		revalidatePath(`/dashboard/sites/${siteId}`);
+	}
+
+	async function runDiagnosticsForUrl(urlId: string) {
+		"use server";
+		await checkUrlDiagnostics(urlId);
+		revalidatePath("/dashboard");
+		revalidatePath(`/dashboard/sites/${siteId}`);
+	}
+
+	async function submitUrlToIndexNow(urlLoc: string) {
+		"use server";
+		await submitToIndexNow(siteId, urlLoc);
+		revalidatePath("/dashboard");
+		revalidatePath("/dashboard/submissions");
 		revalidatePath(`/dashboard/sites/${siteId}`);
 	}
 
@@ -115,11 +130,35 @@ export default async function SiteDetailPage({ params }: SiteDetailPageProps) {
 					) : (
 						<div className="mt-5 divide-y-2 divide-neutral-200">
 							{recentUrls.map((url) => (
-								<div key={url.id} className="py-3">
-									<p className="truncate font-mono text-xs text-neutral-600">{url.loc}</p>
-									<p className="mt-1 text-xs font-bold uppercase text-neutral-500">
-										{url.indexingStatus} / HTTP {url.httpStatus || "unchecked"} / Last checked {formatDate(url.lastCheckedAt)}
-									</p>
+								<div key={url.id} className="py-4">
+									<div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+										<div className="min-w-0">
+											<p className="truncate font-mono text-xs text-neutral-600">{url.loc}</p>
+											<p className="mt-1 text-xs font-bold uppercase text-neutral-500">
+												{url.indexingStatus} / HTTP {url.httpStatus || "unchecked"} / Last checked {formatDate(url.lastCheckedAt)}
+											</p>
+										</div>
+										<div className="flex shrink-0 flex-wrap gap-2">
+											<form action={runDiagnosticsForUrl.bind(null, url.id)}>
+												<button
+													type="submit"
+													className="inline-flex items-center gap-1.5 bg-white px-3 py-2 font-mono text-[10px] font-black uppercase text-black border-2 border-black"
+												>
+													<Database className="h-3.5 w-3.5" />
+													Check
+												</button>
+											</form>
+											<form action={submitUrlToIndexNow.bind(null, url.loc)}>
+												<button
+													type="submit"
+													className="inline-flex items-center gap-1.5 bg-[#ccff00] px-3 py-2 font-mono text-[10px] font-black uppercase text-black border-2 border-black"
+												>
+													<Send className="h-3.5 w-3.5" />
+													Submit
+												</button>
+											</form>
+										</div>
+									</div>
 								</div>
 							))}
 						</div>
