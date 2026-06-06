@@ -246,6 +246,7 @@ export async function checkUrlDiagnostics(urlId: string) {
 		.select({
 			id: urls.id,
 			loc: urls.loc,
+			siteId: urls.siteId,
 		})
 		.from(urls)
 		.innerJoin(sites, eq(urls.siteId, sites.id))
@@ -298,6 +299,39 @@ export async function checkUrlDiagnostics(urlId: string) {
 			status: "fail",
 			details: { error: message },
 		});
+
+		await db
+			.update(urls)
+			.set({
+				indexingStatus: "blockers",
+				lastCheckedAt: new Date(),
+			})
+			.where(eq(urls.id, urlId));
+
+		const alertMessage = `Unable to run diagnostics for ${urlRow.loc}: ${message}`;
+		const [existingAlert] = await db
+			.select({ id: alerts.id })
+			.from(alerts)
+			.where(
+				and(
+					eq(alerts.siteId, urlRow.siteId),
+					eq(alerts.title, "Diagnostics Failed"),
+					eq(alerts.message, alertMessage),
+					eq(alerts.resolved, false),
+				),
+			)
+			.limit(1);
+
+		if (!existingAlert) {
+			await db.insert(alerts).values({
+				siteId: urlRow.siteId,
+				title: "Diagnostics Failed",
+				message: alertMessage,
+				alertType: "error_detected",
+				resolved: false,
+			});
+		}
+
 		return { success: false, error: message };
 	}
 }
