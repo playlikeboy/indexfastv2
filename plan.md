@@ -15,6 +15,27 @@ IndexFast helps site owners and SEO teams understand why pages are visible, invi
 7. Monitor drops, blockers, and errors
 8. Export reports for clients or internal use
 
+## Automation V1 Implementation Map
+
+The first IndexNow/Bing automation pass is now implemented in the app.
+
+- Site-level settings live at `/dashboard/sites/[siteId]/settings`.
+- Sitemaps are managed in the `Sitemaps` tab, including manual add, discovery from robots/common paths, and sync now.
+- IndexNow setup lives in the `IndexNow` tab. Users host the generated key file at `https://{siteHost}/{key}.txt`, then verify it.
+- Optional direct Bing API setup lives in the `Bing` tab. Keys are stored encrypted and validated through Bing quota lookup.
+- Automation enablement lives in the `Automation` tab. It requires site verification, IndexNow verification, and at least one sitemap source.
+- The shared backend automation logic lives in `src/lib/automation`.
+- The hourly Cloudflare cron entrypoint lives in `worker.ts`, configured by `wrangler.jsonc` with `0 * * * *`.
+- Required runtime secrets are `DATABASE_URL` and `CREDENTIAL_ENCRYPTION_KEY`; set both in Cloudflare secrets and in `.dev.vars` for local scheduled testing.
+
+Remaining automation hardening:
+
+- Add gzip sitemap support.
+- Add retry/backoff instead of one-attempt failed jobs.
+- Add pagination and filtering to settings tables.
+- Add integration tests with a database fixture.
+- Add visible toast/inline feedback for settings form actions.
+
 ## Current State
 
 The repo already has the beginning of the right shape:
@@ -23,6 +44,8 @@ The repo already has the beginning of the right shape:
 - Stack auth integration
 - Drizzle schema for users, sites, sitemaps, URLs, checks, submissions, and alerts
 - A dashboard shell
+- Site settings for sitemap sources, IndexNow verification, Bing API credentials, and automation controls
+- Cloudflare hourly cron entrypoint for conservative sitemap sync and submission processing
 - A marketing site that explains the product
 - Server actions for site creation, sitemap sync, diagnostics, and submission tracking
 
@@ -30,9 +53,9 @@ What is still missing or incomplete:
 
 - Several linked routes do not exist yet
 - Auth shell details still need cleanup
-- Real background jobs and scheduled checks are not wired
+- Background jobs need production retry/backoff and operational dashboards
 - Reports, billing, notifications, and API surfaces are not production complete
-- The dashboard is still mostly a scaffold, not the full SaaS experience
+- Some dashboard actions still need richer inline feedback and pagination
 
 ## Implementation Principles
 
@@ -357,4 +380,3 @@ IndexFast is ready when:
 - The public site has no broken navigation
 - The app builds and typechecks cleanly
 - There is a clear path for support, logging, and rollback
-
