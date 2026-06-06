@@ -1,10 +1,10 @@
 import { StackServerApp } from "@stackframe/stack";
 
 export const stack = new StackServerApp({
-	tokenStore: "cookie",
+	tokenStore: "nextjs-cookie",
 	urls: {
-		signIn: "/login",
-		signUp: "/signup",
+		signIn: "/handler/sign-in",
+		signUp: "/handler/sign-up",
 		afterSignIn: "/dashboard",
 		afterSignUp: "/dashboard",
 		afterSignOut: "/",
