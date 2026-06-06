@@ -72,6 +72,7 @@ export default async function SiteSettingsPage({ params, searchParams }: Setting
 
 	const canEnableAutomation =
 		settings.site.verified && settings.indexNow.status === "verified" && settings.sitemapSources.length > 0;
+	const hasIndexNowKey = Boolean(settings.indexNow.key && settings.indexNow.keyLocation);
 
 	return (
 		<div className="space-y-6">
@@ -186,23 +187,36 @@ export default async function SiteSettingsPage({ params, searchParams }: Setting
 						<div className="mt-5 space-y-4 font-mono text-sm">
 							<div>
 								<p className="mb-1 text-xs font-bold uppercase text-muted">File URL</p>
-								<div className="overflow-x-auto rounded-md border border-border bg-surface p-3 text-xs">{settings.indexNow.keyLocation}</div>
+								<div className="overflow-x-auto rounded-md border border-border bg-surface p-3 text-xs">
+									{settings.indexNow.keyLocation || "Set CREDENTIAL_ENCRYPTION_KEY to generate a key location."}
+								</div>
 							</div>
 							<div>
 								<p className="mb-1 text-xs font-bold uppercase text-muted">File content</p>
-								<div className="overflow-x-auto rounded-md border border-border bg-surface p-3 text-xs">{settings.indexNow.key}</div>
+								<div className="overflow-x-auto rounded-md border border-border bg-surface p-3 text-xs">
+									{settings.indexNow.key || "Set CREDENTIAL_ENCRYPTION_KEY to generate a key."}
+								</div>
 							</div>
 						</div>
-						<p className="mt-4 text-sm text-muted">
-							Host a text file at the URL above with the key as the entire file content, then verify it here.
-						</p>
+						{hasIndexNowKey ? (
+							<p className="mt-4 text-sm text-muted">
+								Host a text file at the URL above with the key as the entire file content, then verify it here.
+							</p>
+						) : (
+							<p className="mt-4 text-sm text-muted">
+								Add `CREDENTIAL_ENCRYPTION_KEY` to the runtime environment, restart the app, then refresh this page.
+							</p>
+						)}
 					</div>
 					<div className="rounded-md border border-border bg-card p-5">
 						<h3 className="text-lg font-black uppercase tracking-tight">Verification</h3>
 						<p className="mt-3 font-mono text-xs text-muted">Last checked: {formatDate(settings.indexNow.lastCheckedAt)}</p>
 						{settings.indexNow.lastErrorMessage ? <p className="mt-3 font-mono text-xs text-red-600">{settings.indexNow.lastErrorMessage}</p> : null}
 						<form action={verifyIndexNowKey.bind(null, siteId)} className="mt-5">
-							<button className="w-full rounded-md border border-accent bg-accent px-4 py-3 font-mono text-xs font-black uppercase text-accent-foreground transition-colors hover:bg-accent-dark">
+							<button
+								className="w-full rounded-md border border-accent bg-accent px-4 py-3 font-mono text-xs font-black uppercase text-accent-foreground transition-colors hover:bg-accent-dark disabled:cursor-not-allowed disabled:opacity-60"
+								disabled={!hasIndexNowKey}
+							>
 								Verify IndexNow key
 							</button>
 						</form>

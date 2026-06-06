@@ -10,6 +10,10 @@ function getCredentialSecret() {
 	return secret;
 }
 
+export function hasCredentialEncryptionKey() {
+	return Boolean(process.env.CREDENTIAL_ENCRYPTION_KEY && process.env.CREDENTIAL_ENCRYPTION_KEY.length >= 32);
+}
+
 function toBase64Url(bytes: Uint8Array) {
 	return Buffer.from(bytes).toString("base64url");
 }

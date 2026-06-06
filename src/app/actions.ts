@@ -19,6 +19,7 @@ import {
 	syncSitemapsForUser,
 	verifyIndexNowForUser,
 } from "@/lib/automation/service";
+import { hasCredentialEncryptionKey } from "@/lib/automation/credentials";
 
 async function getAuthUser() {
 	const user = await stack.getUser();
@@ -61,10 +62,6 @@ export async function addSite(domain: string, name: string, sitemapUrl?: string)
 	const cleanName = name.trim();
 	const cleanSitemapUrl = normalizeSitemapUrl(sitemapUrl, cleanHost);
 
-	if (!process.env.CREDENTIAL_ENCRYPTION_KEY || process.env.CREDENTIAL_ENCRYPTION_KEY.length < 32) {
-		throw new Error("CREDENTIAL_ENCRYPTION_KEY must be set before adding sites.");
-	}
-
 	if (!cleanName) {
 		throw new Error("Site label is required");
 	}
@@ -93,7 +90,9 @@ export async function addSite(domain: string, name: string, sitemapUrl?: string)
 		})
 		.returning();
 
-	await ensureIndexNowIntegration(newSite);
+	if (hasCredentialEncryptionKey()) {
+		await ensureIndexNowIntegration(newSite);
+	}
 	if (cleanSitemapUrl) {
 		await addSitemapSourceForUser(userId, newSite.id, cleanSitemapUrl, true);
 	}
@@ -107,7 +106,6 @@ export async function verifySite(siteId: string) {
 	const site = await getSiteForUser(siteId, user.id);
 	if (!site) throw new Error("Site not found");
 
-	await ensureIndexNowIntegration(site);
 	await db.update(sites).set({ verified: true, updatedAt: new Date() }).where(eq(sites.id, siteId));
 	revalidateSiteDashboard(siteId);
 	return { success: true, verified: true };

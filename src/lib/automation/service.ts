@@ -13,7 +13,7 @@ import {
 } from "@/db/schema";
 import { getErrorMessage, getSiteHost, normalizeSitemapUrl, normalizeUrlForHost } from "@/lib/url-utils";
 import { AUTOMATION_LIMITS } from "./constants";
-import { decryptSecret, encryptSecret, maskCredential } from "./credentials";
+import { decryptSecret, encryptSecret, hasCredentialEncryptionKey, maskCredential } from "./credentials";
 import {
 	generateIndexNowKey,
 	getBingSubmissionQuota,
@@ -97,6 +97,63 @@ export async function ensureIndexNowIntegration(site: SiteRow) {
 		.returning();
 
 	return { ...integration, key, keyLocation };
+}
+
+async function getIndexNowSettings(site: SiteRow) {
+	const host = getSiteHost(site);
+	const [existing] = await db
+		.select()
+		.from(siteIntegrations)
+		.where(and(eq(siteIntegrations.siteId, site.id), eq(siteIntegrations.provider, "indexnow")))
+		.limit(1);
+
+	if (existing?.encryptedSecret) {
+		try {
+			const key = await decryptSecret(existing.encryptedSecret);
+			return {
+				status: existing.status,
+				key,
+				keyLocation: getIndexNowKeyLocation(host, key),
+				verifiedAt: existing.verifiedAt,
+				lastCheckedAt: existing.lastCheckedAt,
+				lastErrorMessage: existing.lastErrorMessage,
+				automationEnabled: existing.automationEnabled,
+			};
+		} catch (error) {
+			return {
+				status: "failed",
+				key: null,
+				keyLocation: null,
+				verifiedAt: existing.verifiedAt,
+				lastCheckedAt: existing.lastCheckedAt,
+				lastErrorMessage: `Unable to decrypt IndexNow key: ${getErrorMessage(error)}`,
+				automationEnabled: false,
+			};
+		}
+	}
+
+	if (!hasCredentialEncryptionKey()) {
+		return {
+			status: "missing_secret",
+			key: null,
+			keyLocation: null,
+			verifiedAt: null,
+			lastCheckedAt: null,
+			lastErrorMessage: "Set CREDENTIAL_ENCRYPTION_KEY to generate and verify an IndexNow key.",
+			automationEnabled: false,
+		};
+	}
+
+	const integration = await ensureIndexNowIntegration(site);
+	return {
+		status: integration.status,
+		key: integration.key,
+		keyLocation: integration.keyLocation,
+		verifiedAt: integration.verifiedAt,
+		lastCheckedAt: integration.lastCheckedAt,
+		lastErrorMessage: integration.lastErrorMessage,
+		automationEnabled: integration.automationEnabled,
+	};
 }
 
 export async function verifyIndexNowForUser(userId: string, siteId: string) {
@@ -784,7 +841,7 @@ export async function getSiteSettings(userId: string, siteId: string) {
 			.from(siteSitemaps)
 			.where(eq(siteSitemaps.siteId, siteId))
 			.orderBy(desc(siteSitemaps.isPrimary), desc(siteSitemaps.createdAt)),
-		ensureIndexNowIntegration(site),
+		getIndexNowSettings(site),
 		db
 			.select()
 			.from(userIntegrations)
@@ -792,27 +849,27 @@ export async function getSiteSettings(userId: string, siteId: string) {
 			.limit(1),
 	]);
 	const [bingIntegration] = bing;
-	const bingKey = bingIntegration ? await decryptSecret(bingIntegration.encryptedSecret) : null;
+	let bingKey: string | null = null;
+	let bingErrorMessage = bingIntegration?.lastErrorMessage ?? null;
+	if (bingIntegration) {
+		try {
+			bingKey = await decryptSecret(bingIntegration.encryptedSecret);
+		} catch (error) {
+			bingErrorMessage = `Unable to decrypt Bing key: ${getErrorMessage(error)}`;
+		}
+	}
 
 	return {
 		site,
 		sitemapSources,
-		indexNow: {
-			status: indexNow.status,
-			key: indexNow.key,
-			keyLocation: indexNow.keyLocation,
-			verifiedAt: indexNow.verifiedAt,
-			lastCheckedAt: indexNow.lastCheckedAt,
-			lastErrorMessage: indexNow.lastErrorMessage,
-			automationEnabled: indexNow.automationEnabled,
-		},
+		indexNow,
 		bing: bingIntegration
 			? {
 					status: bingIntegration.status,
 					maskedKey: bingKey ? maskCredential(bingKey) : null,
 					verifiedAt: bingIntegration.verifiedAt,
 					lastCheckedAt: bingIntegration.lastCheckedAt,
-					lastErrorMessage: bingIntegration.lastErrorMessage,
+					lastErrorMessage: bingErrorMessage,
 				}
 			: null,
 	};
