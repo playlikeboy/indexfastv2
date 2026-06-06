@@ -6,8 +6,9 @@ const plans = [
 		price: "$0",
 		period: "",
 		desc: "For personal projects and quick checks.",
-		features: ["1 site", "50 URL checks/month", "20 IndexNow submissions/day", "Basic diagnostics"],
+		features: ["1 site", "Limited API", "Free tools", "Basic diagnostics"],
 		cta: "Start free",
+		productEnv: null,
 		highlight: false,
 	},
 	{
@@ -15,8 +16,9 @@ const plans = [
 		price: "$19",
 		period: "/mo",
 		desc: "For indie hackers and solo builders.",
-		features: ["3 sites", "2,000 checks/month", "Daily sitemap sync", "Export CSV"],
+		features: ["3 sites", "CLI access", "Basic API", "Daily sitemap sync"],
 		cta: "Start Indie plan",
+		productEnv: "DODO_PRODUCT_ID_INDIE",
 		highlight: false,
 	},
 	{
@@ -24,8 +26,9 @@ const plans = [
 		price: "$49",
 		period: "/mo",
 		desc: "For growing sites and small teams.",
-		features: ["10 sites", "10,000 checks/month", "GSC integration", "Deindexing alerts", "Reports"],
+		features: ["10 sites", "MCP access", "Higher API limits", "IndexNow + Bing automation", "Alerts"],
 		cta: "Start Growth plan",
+		productEnv: "DODO_PRODUCT_ID_GROWTH",
 		highlight: true,
 	},
 	{
@@ -33,8 +36,9 @@ const plans = [
 		price: "$99",
 		period: "/mo",
 		desc: "For agencies managing multiple clients.",
-		features: ["30 sites", "40,000 checks/month", "White-label reports", "Team access", "Client exports"],
+		features: ["30 sites", "Client workflows", "Bulk resources", "Team access", "Priority queue"],
 		cta: "Start Agency plan",
+		productEnv: "DODO_PRODUCT_ID_AGENCY",
 		highlight: false,
 	},
 	{
@@ -42,11 +46,21 @@ const plans = [
 		price: "$249",
 		period: "/mo",
 		desc: "For large sites and power users.",
-		features: ["100 sites", "150,000 checks/month", "API access", "Webhooks", "Priority queue"],
+		features: ["100 sites", "Scale API", "Webhooks", "Higher queue priority", "Advanced automation"],
 		cta: "Start Scale plan",
+		productEnv: "DODO_PRODUCT_ID_SCALE",
 		highlight: false,
 	},
 ];
+
+function getCheckoutHref(productEnv: string | null) {
+	if (!productEnv) {
+		return "/dashboard";
+	}
+
+	const productId = process.env[productEnv];
+	return productId ? `/api/checkout?productId=${encodeURIComponent(productId)}&quantity=1` : "/dashboard";
+}
 
 export function Pricing() {
 	return (
@@ -58,7 +72,8 @@ export function Pricing() {
 					<span className="text-highlight">every scale.</span>
 				</h2>
 				<p className="mt-5 max-w-2xl text-lg text-muted">
-					Start free. Upgrade when you need more checks, sites, or team features.
+					Start free. Upgrade when you need CLI, MCP, higher API limits, client
+					workflows, queue priority, or billing-backed automation.
 				</p>
 				<div className="mt-12 grid gap-px bg-ink/15 sm:grid-cols-2 lg:grid-cols-5">
 					{plans.map((plan) => (
@@ -88,7 +103,7 @@ export function Pricing() {
 								))}
 							</ul>
 							<Link
-								href="#cta"
+								href={getCheckoutHref(plan.productEnv)}
 								className={`mt-6 inline-flex items-center justify-center px-4 py-2.5 text-sm font-semibold transition-colors ${
 									plan.highlight
 										? "bg-accent-foreground text-accent hover:opacity-85"
@@ -101,9 +116,8 @@ export function Pricing() {
 					))}
 				</div>
 				<p className="mt-8 text-sm text-muted">
-					Need more checks?{" "}
-					<span className="font-semibold text-ink">Buy extra credits anytime.</span>{" "}
-					No forced plan upgrades.
+					Checkout and customer portal are wired through DodoPayments. API, CLI, MCP,
+					and queue limits are tied to billing tier.
 				</p>
 			</div>
 		</section>

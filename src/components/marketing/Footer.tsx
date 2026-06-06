@@ -5,31 +5,31 @@ export function FinalCTA() {
 	return (
 		<section className="px-4 py-20 sm:px-6 sm:py-24" id="cta" aria-labelledby="cta-heading">
 			<div className="mx-auto max-w-5xl bg-ink px-6 py-16 text-surface sm:px-12 sm:py-20">
-				<p className="label-mono text-surface/60">Free indexing audit</p>
+				<p className="label-mono text-surface/60">Start indexing ops</p>
 				<h2 id="cta-heading" className="display mt-4 max-w-2xl text-4xl text-surface sm:text-5xl">
-					Find out which pages Google is{" "}
-					<span className="text-highlight">ignoring.</span>
+					Give your team and agents a{" "}
+					<span className="text-highlight">search discovery command center.</span>
 				</h2>
 				<p className="mt-5 max-w-xl text-lg text-surface/70">
-					Paste your domain. Get a technical indexing report in minutes.
+					Add a site, verify IndexNow, connect Bing, create API keys, and let
+					MCP or CLI workflows keep publishing launches moving.
 				</p>
-				<form className="mt-8 flex flex-col gap-3 sm:flex-row" action="#cta" method="get">
-					<label htmlFor="domain-input" className="sr-only">Enter your domain</label>
-					<input
-						id="domain-input"
-						type="text"
-						placeholder="example.com"
-						className="w-full border border-surface/30 bg-transparent px-4 py-3 text-sm text-surface placeholder:text-surface/40 focus:border-accent focus:outline-none sm:w-80"
-					/>
-					<button
-						type="submit"
-						className="bg-accent px-6 py-3 text-sm font-semibold text-accent-foreground transition-colors hover:bg-accent-dark"
+				<div className="mt-8 flex flex-col gap-3 sm:flex-row">
+					<Link
+						href="/dashboard"
+						className="inline-flex items-center justify-center bg-accent px-6 py-3 text-sm font-semibold text-accent-foreground transition-colors hover:bg-accent-dark"
 					>
-						Run free indexing audit
-					</button>
-				</form>
+						Open dashboard
+					</Link>
+					<Link
+						href="/dashboard/mcp"
+						className="inline-flex items-center justify-center border border-surface/30 px-6 py-3 text-sm font-semibold text-surface transition-colors hover:border-accent hover:text-accent"
+					>
+						Setup MCP
+					</Link>
+				</div>
 				<p className="mt-4 text-xs text-surface/50">
-					Free. No credit card required. Results in minutes.
+					Start free. Upgrade when you need CLI, MCP, higher API limits, or agency workflows.
 				</p>
 			</div>
 		</section>
@@ -47,7 +47,7 @@ export function Footer() {
 							IndexFast
 						</Link>
 						<p className="mt-3 max-w-xs text-xs leading-relaxed text-muted">
-							Indexing health, sitemap monitoring, and SEO diagnostics for teams that publish at scale.
+							Agent-ready indexing operations, sitemap monitoring, and SEO diagnostics for teams that publish at scale.
 						</p>
 					</div>
 					<div>
@@ -56,6 +56,8 @@ export function Footer() {
 							<li><a href="#features" className="text-sm text-muted transition-colors hover:text-ink">Features</a></li>
 							<li><a href="#pricing" className="text-sm text-muted transition-colors hover:text-ink">Pricing</a></li>
 							<li><Link href="/dashboard" className="text-sm text-muted transition-colors hover:text-ink">Dashboard</Link></li>
+							<li><Link href="/dashboard/mcp" className="text-sm text-muted transition-colors hover:text-ink">MCP Setup</Link></li>
+							<li><Link href="/dashboard/api-keys" className="text-sm text-muted transition-colors hover:text-ink">API Keys</Link></li>
 							<li><Link href="/tools" className="text-sm text-muted transition-colors hover:text-ink">Free Tools</Link></li>
 							<li><Link href="/resources" className="text-sm text-muted transition-colors hover:text-ink">Resources</Link></li>
 							<li><a href="/blog" className="text-sm text-muted transition-colors hover:text-ink">Blog</a></li>

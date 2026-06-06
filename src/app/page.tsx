@@ -2,6 +2,7 @@ import { Navbar } from "@/components/marketing/Navbar";
 import { Hero } from "@/components/marketing/Hero";
 import { Problem } from "@/components/marketing/Problem";
 import { Solution } from "@/components/marketing/Solution";
+import { AgentPlatform } from "@/components/marketing/AgentPlatform";
 import { Features } from "@/components/marketing/Features";
 import { UseCases } from "@/components/marketing/UseCases";
 import { FreeTools } from "@/components/marketing/FreeTools";
@@ -18,6 +19,7 @@ export default function Home() {
 				<Hero />
 				<Problem />
 				<Solution />
+				<AgentPlatform />
 				<Features />
 				<UseCases />
 				<FreeTools />

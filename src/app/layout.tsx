@@ -19,16 +19,20 @@ const SITE_URL = "https://indexfast.co";
 export const metadata: Metadata = {
 	metadataBase: new URL(SITE_URL),
 	title: {
-		default: "IndexFast — Find Pages Google Is Ignoring | Indexing Health & SEO Diagnostics",
+		default: "IndexFast — Agent-Ready Indexing Ops for Fast-Publishing Teams",
 		template: "%s | IndexFast",
 	},
 	description:
-		"IndexFast scans your sitemap, detects unindexed URLs, diagnoses technical blockers, and automates safe discovery through IndexNow, Bing, and Google Search Console workflows.",
+		"IndexFast gives teams and AI agents one command center for sitemap discovery, IndexNow automation, Bing submission, diagnostics, MCP, CLI, API keys, and SEO launch resources.",
 	keywords: [
 		"google indexing checker",
 		"indexing health",
 		"sitemap monitoring",
 		"IndexNow automation",
+		"MCP SEO tools",
+		"SEO API",
+		"SEO CLI",
+		"agentic SEO",
 		"SEO diagnostics",
 		"unindexed pages",
 		"programmatic SEO",
@@ -55,9 +59,9 @@ export const metadata: Metadata = {
 		locale: "en_US",
 		url: SITE_URL,
 		siteName: "IndexFast",
-		title: "IndexFast — Find Pages Google Is Ignoring",
+		title: "IndexFast — Agent-Ready Indexing Ops",
 		description:
-			"Stop publishing invisible pages. IndexFast finds unindexed URLs, diagnoses blockers, and automates safe discovery signals.",
+			"Agent-ready indexing operations for sites that publish fast. Use the dashboard, MCP, CLI, API, IndexNow, Bing, and free SEO resources.",
 		images: [
 			{
 				url: `${SITE_URL}/og-image.png`,
@@ -69,9 +73,9 @@ export const metadata: Metadata = {
 	},
 	twitter: {
 		card: "summary_large_image",
-		title: "IndexFast — Find Pages Google Is Ignoring",
+		title: "IndexFast — Agent-Ready Indexing Ops",
 		description:
-			"Stop publishing invisible pages. IndexFast finds unindexed URLs, diagnoses blockers, and automates safe discovery signals.",
+			"Agent-ready indexing operations for sites that publish fast. Dashboard, MCP, CLI, API, IndexNow, Bing, and free SEO resources.",
 		images: [`${SITE_URL}/og-image.png`],
 	},
 	alternates: {
@@ -99,7 +103,7 @@ const softwareJsonLd = {
 	operatingSystem: "Web",
 	url: SITE_URL,
 	description:
-		"Indexing health, sitemap monitoring, IndexNow automation, Google visibility checking, and SEO diagnostics platform.",
+		"Agent-ready indexing operations platform with sitemap monitoring, IndexNow automation, Bing submission, MCP, CLI, API, free SEO resources, and technical diagnostics.",
 	offers: {
 		"@type": "AggregateOffer",
 		lowPrice: "0",
@@ -126,7 +130,23 @@ const faqJsonLd = {
 			name: "Does IndexFast use Google's Indexing API?",
 			acceptedAnswer: {
 				"@type": "Answer",
-				text: "Google's official Indexing API is limited to specific supported content types such as job postings and livestream/event video pages. IndexFast focuses on safe, broadly applicable workflows: sitemap monitoring, GSC visibility checks, IndexNow automation, Bing submission, and technical diagnostics.",
+				text: "Only for eligible pages. Google's official Indexing API is limited to JobPosting pages and livestream BroadcastEvent pages embedded in VideoObject structured data. IndexFast keeps general Google workflows focused on sitemap hygiene, diagnostics, GSC, and visibility checks.",
+			},
+		},
+		{
+			"@type": "Question",
+			name: "Can AI IDEs and agents use IndexFast?",
+			acceptedAnswer: {
+				"@type": "Answer",
+				text: "Yes. Growth and higher plans can connect to the remote MCP server at /api/mcp with a scoped API key. Agents can list sites, discover sitemaps, sync sources, submit URLs, run diagnostics, read alerts, and use launch prompts.",
+			},
+		},
+		{
+			"@type": "Question",
+			name: "Is there a CLI?",
+			acceptedAnswer: {
+				"@type": "Answer",
+				text: "Yes. The planned IndexFast CLI uses the same API key model and supports login, site add, sitemap discover, sitemap sync, submit, diagnose, alerts, resources, MCP install, and skill install workflows.",
 			},
 		},
 		{
@@ -142,7 +162,7 @@ const faqJsonLd = {
 			name: "Who is IndexFast for?",
 			acceptedAnswer: {
 				"@type": "Answer",
-				text: "IndexFast is built for programmatic SEO builders, SEO agencies, directory sites, marketplaces, SaaS blogs, ecommerce stores, bloggers, and any team that publishes pages at scale and needs to monitor indexing health.",
+				text: "IndexFast is built for programmatic SEO builders, SEO agencies, directory sites, marketplaces, SaaS blogs, AI app teams, ecommerce stores, and any team that publishes pages at scale and wants indexing operations available to humans and agents.",
 			},
 		},
 		{
@@ -158,7 +178,7 @@ const faqJsonLd = {
 			name: "Is IndexFast a black-hat tool?",
 			acceptedAnswer: {
 				"@type": "Answer",
-				text: "No. IndexFast avoids spammy backlink indexing tricks and grey-hat methods. We focus on transparent, technical workflows: sitemap monitoring, indexability diagnostics, IndexNow automation, and GSC-based visibility tracking.",
+				text: "No. IndexFast avoids spammy backlink indexing tricks and grey-hat methods. We focus on transparent, technical workflows: sitemap monitoring, indexability diagnostics, IndexNow automation, Bing submission, resource checklists, and GSC-based visibility tracking.",
 			},
 		},
 	],

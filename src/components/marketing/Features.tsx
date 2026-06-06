@@ -9,12 +9,12 @@ export function Features() {
 			desc: "Upload thousands of URLs via CSV or paste list for batch indexing checks.",
 		},
 		{
-			title: "Google Index Status",
-			desc: "Check whether Google has indexed each URL using live SERP verification.",
+			title: "MCP Server",
+			desc: "Expose list_sites, sync_sitemap, submit_url, diagnostics, alerts, resources, and launch prompts to agentic IDEs.",
 		},
 		{
-			title: "Live SERP Index Checker",
-			desc: "Real-time search engine results page checks to confirm live visibility.",
+			title: "IndexFast CLI",
+			desc: "Run site add, sitemap discover, sitemap sync, submit, diagnose, alerts, resources, and MCP install from terminal workflows.",
 		},
 		{
 			title: "Indexability Diagnostics",
@@ -25,24 +25,24 @@ export function Features() {
 			desc: "Automatically notify Bing and supported search engines when URLs change.",
 		},
 		{
-			title: "Deindexing Alerts",
-			desc: "Get notified the moment a page drops from Google's index.",
+			title: "API Keys & Scopes",
+			desc: "Create hashed API keys with dashboard, API, MCP, resources, and billing-aware access scopes.",
 		},
 		{
-			title: "Agency Reports",
-			desc: "White-label PDF reports for client presentations and indexing audits.",
+			title: "Free SEO Resources",
+			desc: "Use 100+ prioritized directories and curated third-party tools with deep links, effort notes, and launch checklists.",
 		},
 		{
-			title: "API & Webhooks",
-			desc: "Integrate indexing data into your existing workflows with REST API and webhooks.",
+			title: "REST API",
+			desc: "Integrate sites, sitemaps, URLs, diagnostics, submissions, and resource data into internal tools.",
 		},
 		{
-			title: "WordPress & Chrome Extension Ready",
-			desc: "Connect your WordPress sites and use the Chrome extension for quick checks.",
+			title: "DodoPayments Billing",
+			desc: "Gate API, CLI, MCP, queue priority, and agency workflows by tier with checkout and customer portal routes.",
 		},
 		{
-			title: "AI Crawler / llms.txt Readiness",
-			desc: "Check if your site is discoverable by AI crawlers and generate llms.txt files.",
+			title: "Google API Guardrails",
+			desc: "Support Google Indexing API only for eligible JobPosting and livestream pages, with structured-data checks.",
 		},
 		{
 			title: "pSEO Launch Monitoring",
@@ -56,10 +56,11 @@ export function Features() {
 				<p className="label-mono">Features</p>
 				<h2 id="features-heading" className="display mt-3 max-w-3xl text-4xl sm:text-5xl">
 					Everything you need to{" "}
-					<span className="text-highlight">diagnose and fix indexing.</span>
+					<span className="text-highlight">operate indexing at launch speed.</span>
 				</h2>
 				<p className="mt-5 max-w-2xl text-lg text-muted">
-					A complete toolkit for technical indexing health — from discovery to monitoring.
+					A complete toolkit for technical SEO teams and AI agents: dashboard,
+					automation, resources, API, MCP, CLI, billing, and guardrails.
 				</p>
 				<div className="mt-12 grid gap-px bg-ink/10 sm:grid-cols-2 lg:grid-cols-3">
 					{features.map((f) => (

@@ -8,6 +8,8 @@ import {
 	normalizeApiScopes,
 	normalizeBillingTier,
 } from "./plans";
+export { generateApiKey, getApiKeyPrefix, hashApiKey, maskApiKeyPrefix } from "./api-key-utils";
+import { generateApiKey, getApiKeyPrefix, hashApiKey, maskApiKeyPrefix } from "./api-key-utils";
 
 export type AuthenticatedApiKey = {
 	apiKeyId: string;
@@ -16,37 +18,6 @@ export type AuthenticatedApiKey = {
 	scopes: ApiScope[];
 	billingTier: ReturnType<typeof normalizeBillingTier>;
 };
-
-const apiKeyPrefix = "idxf";
-
-function toHex(bytes: ArrayBuffer) {
-	return Array.from(new Uint8Array(bytes))
-		.map((byte) => byte.toString(16).padStart(2, "0"))
-		.join("");
-}
-
-function toBase64Url(bytes: Uint8Array) {
-	return Buffer.from(bytes).toString("base64url");
-}
-
-export function generateApiKey() {
-	const bytes = crypto.getRandomValues(new Uint8Array(32));
-	return `${apiKeyPrefix}_${toBase64Url(bytes)}`;
-}
-
-export async function hashApiKey(value: string) {
-	const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
-	return toHex(digest);
-}
-
-export function getApiKeyPrefix(value: string) {
-	const [prefix, token] = value.split("_");
-	return `${prefix || apiKeyPrefix}_${(token || "").slice(0, 8)}`;
-}
-
-export function maskApiKeyPrefix(prefix: string) {
-	return `${prefix}...`;
-}
 
 async function getUserTier(userId: string) {
 	const [user] = await db.select({ billingTier: users.billingTier }).from(users).where(eq(users.id, userId)).limit(1);

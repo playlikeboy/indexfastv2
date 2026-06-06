@@ -54,6 +54,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
 			priority: 0.65,
 		},
 		{
+			url: `${SITE_URL}/resources/google-indexing-api`,
+			lastModified: new Date(),
+			changeFrequency: "monthly",
+			priority: 0.65,
+		},
+		{
 			url: `${SITE_URL}/about`,
 			lastModified: new Date(),
 			changeFrequency: "monthly",

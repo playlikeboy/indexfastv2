@@ -3,7 +3,7 @@ export function Solution() {
 		{
 			num: "01",
 			title: "Find",
-			desc: "Sync your sitemap and discover new, changed, or orphaned URLs automatically.",
+			desc: "Discover robots.txt sitemaps, common sitemap paths, feeds, and new URLs without a spreadsheet.",
 		},
 		{
 			num: "02",
@@ -12,18 +12,18 @@ export function Solution() {
 		},
 		{
 			num: "03",
-			title: "Verify",
-			desc: "Check Google visibility and GSC status for every URL in your project.",
+			title: "Signal",
+			desc: "Verify IndexNow keys, connect Bing, and submit only new or changed URLs with logs.",
 		},
 		{
 			num: "04",
-			title: "Submit",
-			desc: "Automate safe IndexNow and Bing discovery signals for new and updated pages.",
+			title: "Automate",
+			desc: "Run hourly cron jobs that sync due sites, queue eligible URLs, and cap submission batches safely.",
 		},
 		{
 			num: "05",
-			title: "Monitor",
-			desc: "Get alerts and reports when pages drop from index or change status.",
+			title: "Integrate",
+			desc: "Give AI IDEs, agents, and internal tools the same actions through MCP, REST, and CLI.",
 		},
 	];
 
@@ -33,11 +33,11 @@ export function Solution() {
 				<p className="label-mono">The workflow</p>
 				<h2 id="solution-heading" className="display mt-3 max-w-2xl text-4xl sm:text-5xl">
 					One command center for{" "}
-					<span className="text-highlight">indexing health.</span>
+					<span className="text-highlight">indexing operations.</span>
 				</h2>
 				<p className="mt-5 max-w-2xl text-lg text-muted">
-					A complete workflow from discovery to monitoring — no more stitching together
-					GSC, spreadsheets, and manual checks.
+					A complete workflow from discovery to agent automation. Humans use the
+					dashboard; AI agents use the same backend through API keys and MCP.
 				</p>
 				<div className="mt-12 grid gap-px bg-ink/10 sm:grid-cols-2 lg:grid-cols-5">
 					{steps.map((step) => (

@@ -5,8 +5,10 @@ export function Comparison() {
 		{ feature: "Live URL checks", manual: "One by one", grey: "Bulk (opaque)", indexfast: "Bulk (transparent)" },
 		{ feature: "IndexNow automation", manual: "None", grey: "Sometimes", indexfast: "Built-in" },
 		{ feature: "Deindexing alerts", manual: "None", grey: "None", indexfast: "Real-time" },
-		{ feature: "Client reports", manual: "Spreadsheets", grey: "None", indexfast: "White-label PDF" },
-		{ feature: "API & webhooks", manual: "None", grey: "Rarely", indexfast: "Full API" },
+		{ feature: "MCP for AI IDEs", manual: "None", grey: "None", indexfast: "Remote MCP" },
+		{ feature: "CLI workflows", manual: "Scripts", grey: "None", indexfast: "IndexFast CLI" },
+		{ feature: "API keys", manual: "None", grey: "Rarely", indexfast: "Scoped API" },
+		{ feature: "Launch resources", manual: "Bookmarks", grey: "None", indexfast: "100+ prioritized" },
 		{ feature: "Transparent methods", manual: "N/A", grey: "Opaque", indexfast: "Fully transparent" },
 		{ feature: "No backlink spam", manual: "N/A", grey: "Often", indexfast: "Never" },
 	];
@@ -16,11 +18,12 @@ export function Comparison() {
 			<div className="mx-auto max-w-6xl px-4 sm:px-6">
 				<p className="label-mono">Comparison</p>
 				<h2 id="comparison-heading" className="display mt-3 max-w-3xl text-4xl sm:text-5xl">
-					Safer than black-hat indexers.{" "}
-					<span className="text-highlight">Faster than manual checking.</span>
+					Safer than grey-hat indexers.{" "}
+					<span className="text-highlight">More programmable than manual GSC.</span>
 				</h2>
 				<p className="mt-5 max-w-2xl text-lg text-muted">
-					See how IndexFast compares to manual workflows and grey-hat indexing services.
+					IndexFast is not a magic indexing promise. It is a transparent operating layer
+					for search discovery, diagnostics, and agent-accessible workflows.
 				</p>
 				<div className="mt-12 overflow-x-auto border border-ink">
 					<table className="w-full min-w-[600px] text-sm">

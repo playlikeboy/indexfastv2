@@ -5,7 +5,15 @@ const faqs = [
 	},
 	{
 		q: "Does IndexFast use Google's Indexing API?",
-		a: "Google's official Indexing API is limited to specific supported content types such as job postings and livestream/event video pages. IndexFast focuses on safe, broadly applicable workflows: sitemap monitoring, GSC visibility checks, IndexNow automation, Bing submission, and technical diagnostics.",
+		a: "Only for eligible pages. Google's official Indexing API is limited to JobPosting pages and livestream BroadcastEvent pages embedded in VideoObject structured data. IndexFast keeps general Google workflows focused on sitemap hygiene, diagnostics, GSC, and visibility checks.",
+	},
+	{
+		q: "Can AI IDEs and agents use IndexFast?",
+		a: "Yes. Growth and higher plans can connect to the remote MCP server at /api/mcp with a scoped API key. Agents can list sites, discover sitemaps, sync sources, submit URLs, run diagnostics, read alerts, and use launch prompts.",
+	},
+	{
+		q: "Is there a CLI?",
+		a: "Yes. The planned IndexFast CLI uses the same API key model and supports login, site add, sitemap discover, sitemap sync, submit, diagnose, alerts, resources, MCP install, and skill install workflows.",
 	},
 	{
 		q: "What is IndexNow?",
@@ -13,7 +21,7 @@ const faqs = [
 	},
 	{
 		q: "Who is IndexFast for?",
-		a: "IndexFast is built for programmatic SEO builders, SEO agencies, directory sites, marketplaces, SaaS blogs, ecommerce stores, bloggers, and any team that publishes pages at scale and needs to monitor indexing health.",
+		a: "IndexFast is built for programmatic SEO builders, SEO agencies, directory sites, marketplaces, SaaS blogs, AI app teams, ecommerce stores, and any team that publishes pages at scale and wants indexing operations available to humans and agents.",
 	},
 	{
 		q: "Can I monitor pages without owning the site?",
@@ -21,7 +29,7 @@ const faqs = [
 	},
 	{
 		q: "Is IndexFast a black-hat tool?",
-		a: "No. IndexFast avoids spammy backlink indexing tricks and grey-hat methods. We focus on transparent, technical workflows: sitemap monitoring, indexability diagnostics, IndexNow automation, and GSC-based visibility tracking.",
+		a: "No. IndexFast avoids spammy backlink indexing tricks and grey-hat methods. We focus on transparent, technical workflows: sitemap monitoring, indexability diagnostics, IndexNow automation, Bing submission, resource checklists, and GSC-based visibility tracking.",
 	},
 ];
 
