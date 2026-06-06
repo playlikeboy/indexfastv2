@@ -2,8 +2,9 @@
 
 import React, { useState } from "react";
 import { addSite } from "@/app/actions";
-import { Plus, Loader2 } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { getErrorMessage } from "@/lib/url-utils";
 
 export function AddSiteForm() {
 	const [domain, setDomain] = useState("");
@@ -17,7 +18,7 @@ export function AddSiteForm() {
 	async function handleSubmit(e: React.FormEvent) {
 		e.preventDefault();
 		if (!domain || !name) {
-			setError("Domain name and Site label are required.");
+			setError("Domain name and site label are required.");
 			return;
 		}
 
@@ -32,70 +33,67 @@ export function AddSiteForm() {
 			setName("");
 			setSitemapUrl("");
 			router.refresh();
-		} catch (err: any) {
-			setError(err.message || "Failed to register site. Please try again.");
+		} catch (err: unknown) {
+			setError(getErrorMessage(err) || "Failed to register site. Please try again.");
 		} finally {
 			setLoading(false);
 		}
 	}
 
 	return (
-		<div className="bg-white border-4 border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative overflow-hidden">
-			<div className="absolute top-0 right-0 bg-black text-[#ccff00] font-mono text-[10px] font-bold px-3 py-1 uppercase border-l-2 border-b-2 border-black">
-				Configure Monitoring
+		<div className="rounded-md border border-border bg-card p-5">
+			<div className="mb-5 flex items-center justify-between gap-3">
+				<h3 className="text-lg font-black uppercase tracking-tight">Add Web Property</h3>
+				<span className="rounded-sm bg-surface px-2 py-1 font-mono text-[10px] font-bold uppercase text-muted">Setup</span>
 			</div>
 
-			<h3 className="text-xl font-black uppercase mb-4 tracking-tight">Add Web Property</h3>
-
 			{error && (
-				<div className="bg-red-100 border-2 border-black p-3 font-mono text-xs text-red-700 mb-4 font-bold">
-					⚠️ ERROR: {error}
+				<div className="mb-4 rounded-md border border-red-300 bg-red-50 p-3 font-mono text-xs font-semibold text-red-700 dark:border-red-900 dark:bg-red-950/30">
+					{error}
 				</div>
 			)}
 
 			{success && (
-				<div className="bg-green-100 border-2 border-black p-3 font-mono text-xs text-green-800 mb-4 font-bold">
-					✓ SUCCESS: Web property registered! Initializing crawler queue...
+				<div className="mb-4 rounded-md border border-green-300 bg-green-50 p-3 font-mono text-xs font-semibold text-green-700 dark:border-green-900 dark:bg-green-950/30">
+					Web property registered. Configure automation in Site Settings.
 				</div>
 			)}
 
 			<form onSubmit={handleSubmit} className="space-y-4">
 				<div>
-					<label className="block font-mono text-xs font-bold uppercase mb-1">Site Label / Name</label>
+					<label className="mb-1 block font-mono text-xs font-bold uppercase text-muted">Site Label</label>
 					<input
 						type="text"
 						value={name}
 						onChange={(e) => setName(e.target.value)}
-						placeholder="e.g., My SaaS Blog"
-						className="w-full bg-[#f2f1ec] border-2 border-black p-2 font-mono text-sm focus:outline-none focus:bg-white"
+						placeholder="My SaaS Blog"
+						className="w-full rounded-md border border-border bg-surface p-2.5 font-mono text-sm text-ink outline-none transition-colors focus:border-ink"
 						disabled={loading}
 						required
 					/>
 				</div>
 
 				<div>
-					<label className="block font-mono text-xs font-bold uppercase mb-1">Domain Name</label>
+					<label className="mb-1 block font-mono text-xs font-bold uppercase text-muted">Domain Name</label>
 					<input
 						type="text"
 						value={domain}
 						onChange={(e) => setDomain(e.target.value)}
-						placeholder="e.g., mysite.com"
-						className="w-full bg-[#f2f1ec] border-2 border-black p-2 font-mono text-sm focus:outline-none focus:bg-white"
+						placeholder="www.example.com"
+						className="w-full rounded-md border border-border bg-surface p-2.5 font-mono text-sm text-ink outline-none transition-colors focus:border-ink"
 						disabled={loading}
 						required
 					/>
 				</div>
 
 				<div>
-					<label className="block font-mono text-xs font-bold uppercase mb-1">
-						Sitemap XML URL <span className="text-neutral-400 font-normal">(Optional)</span>
-					</label>
+					<label className="mb-1 block font-mono text-xs font-bold uppercase text-muted">Initial Sitemap URL</label>
 					<input
 						type="url"
 						value={sitemapUrl}
 						onChange={(e) => setSitemapUrl(e.target.value)}
-						placeholder="e.g., https://mysite.com/sitemap.xml"
-						className="w-full bg-[#f2f1ec] border-2 border-black p-2 font-mono text-sm focus:outline-none focus:bg-white"
+						placeholder="https://www.example.com/sitemap.xml"
+						className="w-full rounded-md border border-border bg-surface p-2.5 font-mono text-sm text-ink outline-none transition-colors focus:border-ink"
 						disabled={loading}
 					/>
 				</div>
@@ -103,19 +101,10 @@ export function AddSiteForm() {
 				<button
 					type="submit"
 					disabled={loading}
-					className="w-full bg-[#ccff00] text-black font-mono font-black uppercase py-3 border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-1 active:translate-y-1 active:shadow-none disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+					className="flex w-full items-center justify-center gap-2 rounded-md border border-accent bg-accent px-4 py-3 font-mono text-xs font-black uppercase text-accent-foreground transition-colors hover:bg-accent-dark disabled:cursor-not-allowed disabled:opacity-60"
 				>
-					{loading ? (
-						<>
-							<Loader2 className="w-4 h-4 animate-spin" />
-							REGISTERING...
-						</>
-					) : (
-						<>
-							<Plus className="w-4 h-4" />
-							ADD PROPERTY
-						</>
-					)}
+					{loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+					{loading ? "Registering" : "Add Property"}
 				</button>
 			</form>
 		</div>

@@ -22,13 +22,13 @@ export default async function AlertsPage() {
 
 	return (
 		<div className="space-y-6">
-			<div className="bg-white border-4 border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+			<div className="rounded-md border border-border bg-card p-5">
 				<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 					<div>
-						<p className="font-mono text-xs font-bold uppercase text-neutral-500">Alert Center</p>
+						<p className="font-mono text-xs font-bold uppercase text-muted">Alert Center</p>
 						<h2 className="mt-2 text-3xl font-black uppercase tracking-tight">Indexing Alerts</h2>
 					</div>
-					<span className="inline-flex items-center gap-2 self-start bg-[#ccff00] px-3 py-2 font-mono text-xs font-black uppercase text-black border-2 border-black">
+					<span className="inline-flex items-center gap-2 self-start rounded-md border border-accent bg-accent px-3 py-2 font-mono text-xs font-black uppercase text-accent-foreground">
 						<AlertTriangle className="h-4 w-4" />
 						{openTotal} open / {total} tracked
 					</span>
@@ -36,40 +36,46 @@ export default async function AlertsPage() {
 			</div>
 
 			{alertRows.length === 0 ? (
-				<div className="bg-white border-4 border-black p-8 text-center shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+				<div className="rounded-md border border-border bg-card p-8 text-center">
 					<CheckCircle className="mx-auto h-10 w-10 text-green-600" />
 					<h3 className="mt-4 text-xl font-black uppercase">No alerts yet</h3>
-					<p className="mx-auto mt-2 max-w-md font-mono text-sm text-neutral-500">
+					<p className="mx-auto mt-2 max-w-md font-mono text-sm text-muted">
 						Once sitemap syncs or diagnostics find an issue, it will appear here.
 					</p>
 				</div>
 			) : (
-				<div className="divide-y-2 divide-neutral-200 bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+				<div className="divide-y divide-border rounded-md border border-border bg-card">
 					{alertRows.map((alert) => (
 						<div key={alert.id} className="p-5">
 							<div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-								<div>
+								<div className="min-w-0">
 									<h3 className="font-black uppercase tracking-tight">{alert.title}</h3>
-									<p className="mt-1 font-mono text-xs text-neutral-500">
+									<p className="mt-1 font-mono text-xs text-muted">
 										{alert.siteName} / {formatDate(alert.createdAt)}
 									</p>
-									<p className={`mt-2 inline-flex border border-black px-2 py-1 font-mono text-[10px] font-black uppercase ${alert.resolved ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
+									<p
+										className={`mt-2 inline-flex rounded-sm border px-2 py-1 font-mono text-[10px] font-black uppercase ${
+											alert.resolved
+												? "border-green-300 bg-green-50 text-green-700 dark:border-green-900 dark:bg-green-950/30"
+												: "border-red-300 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-950/30"
+										}`}
+									>
 										{alert.resolved ? "Resolved" : "Open"}
 									</p>
-									<p className="mt-3 text-sm text-neutral-700">{alert.message}</p>
+									<p className="mt-3 text-sm text-muted">{alert.message}</p>
 								</div>
 								<div className="flex shrink-0 flex-wrap gap-2">
 									<form action={setAlertResolved.bind(null, alert.id, !alert.resolved)}>
 										<button
 											type="submit"
-											className="bg-black px-3 py-2 font-mono text-xs font-black uppercase text-[#ccff00] border-2 border-black"
+											className="rounded-md border border-border bg-surface px-3 py-2 font-mono text-xs font-black uppercase text-ink transition-colors hover:border-ink"
 										>
 											{alert.resolved ? "Reopen" : "Resolve"}
 										</button>
 									</form>
 									<Link
 										href={`/dashboard/sites/${alert.siteId}`}
-										className="bg-[#ccff00] px-3 py-2 font-mono text-xs font-black uppercase text-black border-2 border-black"
+										className="rounded-md border border-accent bg-accent px-3 py-2 font-mono text-xs font-black uppercase text-accent-foreground transition-colors hover:bg-accent-dark"
 									>
 										Inspect
 									</Link>

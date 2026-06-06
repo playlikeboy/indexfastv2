@@ -115,9 +115,8 @@ export async function verifySite(siteId: string) {
 
 export async function syncSitemap(siteId: string) {
 	const user = await getAuthUser();
-	const result = await syncSitemapsForUser(user.id, siteId);
+	await syncSitemapsForUser(user.id, siteId);
 	revalidateSiteDashboard(siteId);
-	return result;
 }
 
 export async function checkUrlDiagnostics(urlId: string) {
@@ -230,9 +229,8 @@ export async function saveSitemapSource(siteId: string, formData: FormData) {
 	const user = await getAuthUser();
 	const sitemapUrl = readFormString(formData, "sitemapUrl");
 	const makePrimary = formData.get("isPrimary") === "on";
-	const source = await addSitemapSourceForUser(user.id, siteId, sitemapUrl, makePrimary);
+	await addSitemapSourceForUser(user.id, siteId, sitemapUrl, makePrimary);
 	revalidateSiteDashboard(siteId);
-	return source;
 }
 
 export async function deleteSitemapSource(siteId: string, sourceId: string) {
@@ -243,24 +241,21 @@ export async function deleteSitemapSource(siteId: string, sourceId: string) {
 
 export async function discoverSitemapSources(siteId: string) {
 	const user = await getAuthUser();
-	const discovered = await discoverSitemapsForUser(user.id, siteId);
+	await discoverSitemapsForUser(user.id, siteId);
 	revalidateSiteDashboard(siteId);
-	return discovered;
 }
 
 export async function verifyIndexNowKey(siteId: string) {
 	const user = await getAuthUser();
-	const result = await verifyIndexNowForUser(user.id, siteId);
+	await verifyIndexNowForUser(user.id, siteId);
 	revalidateSiteDashboard(siteId);
-	return result;
 }
 
 export async function saveBingApiKey(siteId: string, formData: FormData) {
 	const user = await getAuthUser();
 	const apiKey = readFormString(formData, "apiKey");
-	const result = await saveBingApiKeyForUser(user.id, apiKey);
+	await saveBingApiKeyForUser(user.id, apiKey);
 	revalidateSiteDashboard(siteId);
-	return result;
 }
 
 export async function removeBingApiKey(siteId: string) {
