@@ -82,9 +82,8 @@ export default async function McpPage() {
 }`}</CodeBlock>
 
 					<h3 className="mt-6 text-base font-black uppercase tracking-tight">Install CLI</h3>
-					<CodeBlock>{`curl -fsSL https://indexfast.co/install.sh | sh
-indexfast login --api-key YOUR_INDEXFAST_API_KEY
-indexfast mcp install`}</CodeBlock>
+					<CodeBlock>{`npx indexfast login --api-key YOUR_INDEXFAST_API_KEY
+npx indexfast mcp install`}</CodeBlock>
 
 					<h3 className="mt-6 text-base font-black uppercase tracking-tight">Install agent skill</h3>
 					<CodeBlock>{`curl -fsSL https://indexfast.co/resources/skill/SKILL.md -o ~/.codex/skills/indexfast/SKILL.md`}</CodeBlock>
