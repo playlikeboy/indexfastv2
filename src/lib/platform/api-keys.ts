@@ -122,6 +122,7 @@ export async function authenticateApiRequest(
 			userId: apiKeys.userId,
 			name: apiKeys.name,
 			scopes: apiKeys.scopes,
+			lastUsedAt: apiKeys.lastUsedAt,
 			billingTier: users.billingTier,
 		})
 		.from(apiKeys)
