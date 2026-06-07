@@ -1,3 +1,4 @@
+import { Metadata } from "next";
 import Link from "next/link";
 import { Navbar } from "@/components/marketing/Navbar";
 import { Footer } from "@/components/marketing/Footer";
@@ -5,6 +6,12 @@ import { BreadcrumbJsonLd } from "@/components/marketing/BreadcrumbJsonLd";
 import { blogPosts } from "@/lib/marketing-data";
 
 const SITE_URL = "https://indexfast.co";
+
+export const metadata: Metadata = {
+	title: "Blog | IndexFast",
+	description:
+		"Practical guides on indexing health, sitemap management, pSEO launch monitoring, and safe discovery workflows.",
+};
 
 const breadcrumbs = [
 	{ name: "Home", url: SITE_URL },

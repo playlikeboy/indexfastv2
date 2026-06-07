@@ -155,7 +155,11 @@ export async function authenticateApiRequest(
 		throw new Error("CLI access requires the Indie plan or higher.");
 	}
 
-	await db.update(apiKeys).set({ lastUsedAt: now, updatedAt: now }).where(eq(apiKeys.id, row.id));
+	// Only update lastUsedAt if it hasn't been updated in the last hour to reduce DB load
+	const ONE_HOUR_MS = 60 * 60 * 1000;
+	if (!row.lastUsedAt || now.getTime() - row.lastUsedAt.getTime() > ONE_HOUR_MS) {
+		await db.update(apiKeys).set({ lastUsedAt: now, updatedAt: now }).where(eq(apiKeys.id, row.id));
+	}
 
 	return {
 		apiKeyId: row.id,

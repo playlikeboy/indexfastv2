@@ -1,9 +1,16 @@
+import { Metadata } from "next";
 import Link from "next/link";
 import { Navbar } from "@/components/marketing/Navbar";
 import { Footer } from "@/components/marketing/Footer";
 import { BreadcrumbJsonLd } from "@/components/marketing/BreadcrumbJsonLd";
 
 const SITE_URL = "https://indexfast.co";
+
+export const metadata: Metadata = {
+	title: "About | IndexFast",
+	description:
+		"IndexFast is built for programmatic SEO teams. We turn invisible pages into actionable signals for indexing health and visibility.",
+};
 
 const breadcrumbs = [
 	{ name: "Home", url: SITE_URL },
