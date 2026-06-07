@@ -14,5 +14,7 @@ npm install -g "${PACKAGE_NAME}"
 
 echo ""
 echo "IndexFast CLI installed."
+echo "You can also run commands instantly with: npx indexfast <command>"
+echo ""
 echo "Create an API key in https://indexfast.co/dashboard/api-keys"
 echo "Then run: indexfast login --api-key if_live_..."
