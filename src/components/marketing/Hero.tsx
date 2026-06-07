@@ -37,8 +37,8 @@ export function Hero() {
 							</Link>
 						</div>
 						<p className="mt-4 text-sm text-muted">
-							YC-ready product truth: no fake Google guarantees, no backlink spam, just
-							agent-friendly indexing operations.
+							No fake Google guarantees, no backlink spam — just agent-friendly
+							indexing operations.
 						</p>
 					</div>
 					<DashboardMockup />
