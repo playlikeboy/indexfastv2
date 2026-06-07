@@ -58,7 +58,7 @@ export default async function DashboardOverview() {
 			<div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
 				<section className="lg:col-span-2 rounded-md border border-border bg-card p-5">
 					<div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-						<h2 className="text-xl font-black uppercase tracking-tight">Monitored Domains</h2>
+						<h2 className="text-xl font-black uppercase tracking-tight">Domains</h2>
 						<span className="w-fit rounded-sm border border-border bg-surface px-3 py-1 font-mono text-[11px] font-bold uppercase text-muted">
 							{stats.totalSites} active
 						</span>
@@ -67,7 +67,7 @@ export default async function DashboardOverview() {
 					{userSites.length === 0 ? (
 						<div className="rounded-md border border-dashed border-border bg-surface p-8 text-center">
 							<p className="font-mono text-sm text-muted">No domains connected yet.</p>
-							<p className="mt-2 font-mono text-xs text-muted">Add a property to configure sitemaps and automation.</p>
+							<p className="mt-2 font-mono text-xs text-muted">Add a property to start tracking.</p>
 						</div>
 					) : (
 						<div className="divide-y divide-border">
@@ -122,3 +122,4 @@ export default async function DashboardOverview() {
 		</div>
 	);
 }
+
