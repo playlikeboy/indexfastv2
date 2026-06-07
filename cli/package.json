@@ -1,0 +1,19 @@
+{
+  "name": "indexfast",
+  "version": "0.1.0",
+  "description": "IndexFast CLI for Agentic SEO operations",
+  "main": "index.js",
+  "bin": {
+    "indexfast": "./bin/indexfast.js"
+  },
+  "scripts": {
+    "start": "node ./bin/indexfast.js"
+  },
+  "keywords": [
+    "seo",
+    "indexfast",
+    "cli"
+  ],
+  "author": "",
+  "license": "MIT"
+}
