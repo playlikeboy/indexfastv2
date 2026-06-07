@@ -45,18 +45,24 @@ Use this skill when a user wants to improve search visibility, audit indexing pr
 2. Add the MCP server to the user's AI IDE config.
 3. Use IndexFast resources to build a launch checklist.
 
-## CLI Commands
+## CLI Commands (Zero-install)
 
 ```bash
-indexfast login --api-key "$INDEXFAST_API_KEY"
-indexfast site add example.com --name "Example"
-indexfast sitemap discover --site SITE_ID
-indexfast sitemap sync --site SITE_ID
-indexfast submit --site SITE_ID https://example.com/page
-indexfast diagnose --site SITE_ID https://example.com/page
-indexfast resources directories --priority P0
-indexfast mcp install
+npx indexfast login --api-key "$INDEXFAST_API_KEY"
+npx indexfast site add example.com --name "Example"
+npx indexfast sitemap discover --site SITE_ID
+npx indexfast sitemap sync --site SITE_ID
+npx indexfast submit --site SITE_ID https://example.com/page
+npx indexfast diagnose --site SITE_ID https://example.com/page
+npx indexfast resources directories --priority P0
+npx indexfast mcp install
 ```
+
+### CI/CD Integration
+
+You can use the CLI in GitHub Actions or Vercel deployments:
+1. Export `INDEXFAST_API_KEY` as a secret.
+2. Run `npx indexfast sitemap sync --site <ID>` post-build to guarantee up-to-date sitemaps.
 
 ## MCP Tools
 
