@@ -3,8 +3,24 @@ import { Mail, MessageSquare, ShieldCheck } from "lucide-react";
 import { Navbar } from "@/components/marketing/Navbar";
 import { Footer } from "@/components/marketing/Footer";
 import { BreadcrumbJsonLd } from "@/components/marketing/BreadcrumbJsonLd";
+import type { Metadata } from "next";
 
 const SITE_URL = "https://indexfast.co";
+
+export const metadata: Metadata = {
+	title: "Contact IndexFast Team",
+	description:
+		"Get in touch with the IndexFast team for product support, enterprise api sales, security responsible disclosure, or agency billing workspaces queries.",
+	keywords: [
+		"contact indexfast",
+		"indexfast support",
+		"indexfast customer sales",
+		"technical support indexfast",
+	],
+	alternates: {
+		canonical: `${SITE_URL}/contact`,
+	},
+};
 
 const contactPaths = [
 	{

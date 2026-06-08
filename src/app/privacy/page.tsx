@@ -1,11 +1,19 @@
-"use client";
-
 import Link from "next/link";
 import { Navbar } from "@/components/marketing/Navbar";
 import { Footer } from "@/components/marketing/Footer";
 import { BreadcrumbJsonLd } from "@/components/marketing/BreadcrumbJsonLd";
+import type { Metadata } from "next";
 
 const SITE_URL = "https://indexfast.co";
+
+export const metadata: Metadata = {
+	title: "Privacy Policy",
+	description:
+		"Read the IndexFast privacy policy to learn how we securely collect, process, and safeguard your account details and web property diagnostic data.",
+	alternates: {
+		canonical: `${SITE_URL}/privacy`,
+	},
+};
 
 const breadcrumbs = [
 	{ name: "Home", url: SITE_URL },
@@ -17,6 +25,7 @@ export default function PrivacyPage() {
 		<>
 			<Navbar />
 			<main>
+				<BreadcrumbJsonLd items={breadcrumbs} />
 				<section className="py-20 sm:py-28" aria-labelledby="privacy-heading">
 					<div className="mx-auto max-w-3xl px-4 sm:px-6">
 						<p className="label-mono">Privacy Policy</p>

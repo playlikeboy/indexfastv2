@@ -2,8 +2,18 @@ import Link from "next/link";
 import { Navbar } from "@/components/marketing/Navbar";
 import { Footer } from "@/components/marketing/Footer";
 import { BreadcrumbJsonLd } from "@/components/marketing/BreadcrumbJsonLd";
+import type { Metadata } from "next";
 
 const SITE_URL = "https://indexfast.co";
+
+export const metadata: Metadata = {
+	title: "Terms of Service",
+	description:
+		"Read the IndexFast terms of service to understand user guidelines, payment and billing terms, fair use limits, and liability policies.",
+	alternates: {
+		canonical: `${SITE_URL}/terms`,
+	},
+};
 
 const breadcrumbs = [
 	{ name: "Home", url: SITE_URL },
@@ -15,6 +25,7 @@ export default function TermsPage() {
 		<>
 			<Navbar />
 			<main>
+				<BreadcrumbJsonLd items={breadcrumbs} />
 				<section className="py-20 sm:py-28" aria-labelledby="terms-heading">
 					<div className="mx-auto max-w-3xl px-4 sm:px-6">
 						<p className="label-mono">Terms of Service</p>

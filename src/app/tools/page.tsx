@@ -3,8 +3,26 @@ import { Navbar } from "@/components/marketing/Navbar";
 import { Footer } from "@/components/marketing/Footer";
 import { BreadcrumbJsonLd } from "@/components/marketing/BreadcrumbJsonLd";
 import { tools } from "@/lib/marketing-data";
+import type { Metadata } from "next";
 
 const SITE_URL = "https://indexfast.co";
+
+export const metadata: Metadata = {
+	title: "Free SEO Indexing & Diagnostics Tools",
+	description:
+		"Diagnose search index status, extract XML sitemaps, verify robots.txt, audit canonical tags, and check HTTP status codes. Free, no signup required.",
+	keywords: [
+		"free seo tools",
+		"google index checker",
+		"sitemap url extractor",
+		"robots.txt checker",
+		"indexnow key generator",
+		"canonical tag checker",
+	],
+	alternates: {
+		canonical: `${SITE_URL}/tools`,
+	},
+};
 
 const breadcrumbs = [
 	{ name: "Home", url: SITE_URL },

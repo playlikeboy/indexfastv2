@@ -82,7 +82,7 @@ export const metadata: Metadata = {
 		canonical: SITE_URL,
 	},
 	icons: {
-		icon: "/favicon.svg",
+		icon: "/logo.png",
 	},
 };
 
