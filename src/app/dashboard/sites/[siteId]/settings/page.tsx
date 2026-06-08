@@ -11,6 +11,8 @@ import {
 	syncSitemap,
 	toggleSiteAutomation,
 	verifyIndexNowKey,
+	toggleEngineAutomation,
+	updateUrlRules,
 } from "@/app/actions";
 import { getSiteSettings } from "@/lib/automation/service";
 import { stack } from "@/stack";
@@ -44,7 +46,7 @@ function isTab(value: string | undefined): value is TabId {
 }
 
 function StatusBadge({ status }: { status: string }) {
-	const positive = status === "verified" || status === "active" || status === "success";
+	const positive = status === "verified" || status === "active" || status === "success" || status === "enabled";
 	return (
 		<span
 			className={`rounded-sm border px-2 py-1 font-mono text-[10px] font-bold uppercase ${
@@ -315,8 +317,105 @@ export default async function SiteSettingsPage({ params, searchParams }: Setting
 						<p className="mt-5 text-sm text-muted">
 							Hourly automation syncs due sitemap sources, queues new or changed URLs, then submits capped batches through verified engines.
 						</p>
+
+						<div className="mt-8 border-t border-border pt-6">
+							<h4 className="text-lg font-black uppercase tracking-tight mb-4">Submission Engines</h4>
+							<div className="space-y-4">
+								{/* IndexNow */}
+								<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between rounded-md border border-border bg-surface p-4">
+									<div>
+										<h5 className="font-mono text-sm font-bold">IndexNow (Bing, Yandex, Seznam)</h5>
+										<p className="font-mono text-xs text-muted mt-1">Automatic signaling via IndexNow protocol.</p>
+									</div>
+									<div className="flex items-center gap-3 justify-between sm:justify-start">
+										<StatusBadge status={settings.indexNow.status === "verified" && settings.indexNow.automationEnabled ? "enabled" : "disabled"} />
+										<form action={toggleEngineAutomation.bind(null, siteId, "indexnow", !settings.indexNow.automationEnabled)}>
+											<button
+												className="rounded-md border border-border bg-card px-3 py-1.5 font-mono text-xs font-black uppercase text-ink transition-colors hover:border-ink disabled:opacity-60 disabled:cursor-not-allowed"
+												disabled={settings.indexNow.status !== "verified"}
+											>
+												{settings.indexNow.automationEnabled ? "Disable" : "Enable"}
+											</button>
+										</form>
+									</div>
+								</div>
+
+								{/* Bing Webmaster API */}
+								<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between rounded-md border border-border bg-surface p-4">
+									<div>
+										<h5 className="font-mono text-sm font-bold">Bing Webmaster API (Direct API)</h5>
+										<p className="font-mono text-xs text-muted mt-1">Submit directly to Bing Webmaster endpoint.</p>
+									</div>
+									<div className="flex items-center gap-3 justify-between sm:justify-start">
+										<StatusBadge status={settings.bing && settings.bing.status === "verified" && settings.bing.automationEnabled ? "enabled" : "disabled"} />
+										<form action={toggleEngineAutomation.bind(null, siteId, "bing", !settings.bing?.automationEnabled)}>
+											<button
+												className="rounded-md border border-border bg-card px-3 py-1.5 font-mono text-xs font-black uppercase text-ink transition-colors hover:border-ink disabled:opacity-60 disabled:cursor-not-allowed"
+												disabled={!settings.bing || settings.bing.status !== "verified"}
+											>
+												{settings.bing?.automationEnabled ? "Disable" : "Enable"}
+											</button>
+										</form>
+									</div>
+								</div>
+
+								{/* Google Indexing API */}
+								<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between rounded-md border border-border bg-surface p-4">
+									<div>
+										<h5 className="font-mono text-sm font-bold">Google Indexing API (Job/Livestream Only)</h5>
+										<p className="font-mono text-xs text-muted mt-1">Submit JobPosting and BroadcastEvent pages to Google.</p>
+									</div>
+									<div className="flex items-center gap-3 justify-between sm:justify-start">
+										<StatusBadge status={settings.google.automationEnabled ? "enabled" : "disabled"} />
+										<form action={toggleEngineAutomation.bind(null, siteId, "google", !settings.google.automationEnabled)}>
+											<button
+												className="rounded-md border border-border bg-card px-3 py-1.5 font-mono text-xs font-black uppercase text-ink transition-colors hover:border-ink"
+											>
+												{settings.google.automationEnabled ? "Disable" : "Enable"}
+											</button>
+										</form>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div className="mt-8 border-t border-border pt-6">
+							<h4 className="text-lg font-black uppercase tracking-tight mb-4">URL Ingestion Rules</h4>
+							<form action={updateUrlRules.bind(null, siteId)} className="space-y-4">
+								<div className="space-y-2">
+									<label className="flex items-start gap-3 rounded-md border border-border bg-surface p-4 cursor-pointer">
+										<input
+											name="submitNewUrls"
+											type="checkbox"
+											defaultChecked={settings.indexNow.submitNewUrls}
+											className="mt-0.5 h-4 w-4 accent-lime-400"
+										/>
+										<div>
+											<p className="font-mono text-sm font-bold">Submit Newly Discovered URLs</p>
+											<p className="font-mono text-xs text-muted mt-1">Automatically submit URLs when first seen in sitemaps.</p>
+										</div>
+									</label>
+
+									<label className="flex items-start gap-3 rounded-md border border-border bg-surface p-4 cursor-pointer">
+										<input
+											name="submitChangedUrls"
+											type="checkbox"
+											defaultChecked={settings.indexNow.submitChangedUrls}
+											className="mt-0.5 h-4 w-4 accent-lime-400"
+										/>
+										<div>
+											<p className="font-mono text-sm font-bold">Submit Updated URLs</p>
+											<p className="font-mono text-xs text-muted mt-1">Automatically submit URLs when their last modified date changes.</p>
+										</div>
+									</label>
+								</div>
+								<button className="rounded-md border border-accent bg-accent px-4 py-2 font-mono text-xs font-black uppercase text-accent-foreground transition-colors hover:bg-accent-dark">
+									Save Rules
+								</button>
+							</form>
+						</div>
 					</div>
-					<form action={toggleSiteAutomation.bind(null, siteId)} className="rounded-md border border-border bg-card p-5">
+					<form action={toggleSiteAutomation.bind(null, siteId)} className="rounded-md border border-border bg-card p-5 h-fit">
 						<h3 className="text-lg font-black uppercase tracking-tight">Status</h3>
 						<p className="mt-3 font-mono text-sm text-muted">
 							Current: <span className="font-bold text-ink">{settings.site.automationEnabled ? "Enabled" : "Disabled"}</span>

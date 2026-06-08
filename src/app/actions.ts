@@ -19,6 +19,8 @@ import {
 	syncSitemapsForUser,
 	verifyIndexNowForUser,
 	saveIndexNowKeyForUser,
+	updateEngineAutomationForUser,
+	updateUrlSubmissionRulesForUser,
 } from "@/lib/automation/service";
 import { createApiKeyForUser, revokeApiKeyForUser } from "@/lib/platform/api-keys";
 import { DEFAULT_API_SCOPES, normalizeApiScopes } from "@/lib/platform/plans";
@@ -312,4 +314,18 @@ export async function setAlertResolved(alertId: string, resolved: boolean) {
 
 	await db.update(alerts).set({ resolved }).where(eq(alerts.id, alertId));
 	revalidateSiteDashboard(alertRow.siteId);
+}
+
+export async function toggleEngineAutomation(siteId: string, provider: string, enabled: boolean) {
+	const user = await getAuthUser();
+	await updateEngineAutomationForUser(user.id, siteId, provider, enabled);
+	revalidateSiteDashboard(siteId);
+}
+
+export async function updateUrlRules(siteId: string, formData: FormData) {
+	const user = await getAuthUser();
+	const submitNewUrls = formData.get("submitNewUrls") === "on";
+	const submitChangedUrls = formData.get("submitChangedUrls") === "on";
+	await updateUrlSubmissionRulesForUser(user.id, siteId, submitNewUrls, submitChangedUrls);
+	revalidateSiteDashboard(siteId);
 }

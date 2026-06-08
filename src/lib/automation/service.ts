@@ -44,6 +44,8 @@ type IndexNowPublicConfig = {
 	host?: string;
 	keyLocation?: string;
 	storage?: string;
+	submitNewUrls?: boolean;
+	submitChangedUrls?: boolean;
 };
 
 function readPublicConfig(value: unknown): IndexNowPublicConfig {
@@ -170,6 +172,7 @@ async function getIndexNowSettings(site: SiteRow) {
 		try {
 			const key = await readStoredSecret(existing.encryptedSecret);
 			const keyLocation = getConfiguredKeyLocation(existing.publicConfig, host, key);
+			const config = readPublicConfig(existing.publicConfig);
 			return {
 				status: existing.status,
 				key,
@@ -178,6 +181,8 @@ async function getIndexNowSettings(site: SiteRow) {
 				lastCheckedAt: existing.lastCheckedAt,
 				lastErrorMessage: existing.lastErrorMessage,
 				automationEnabled: existing.automationEnabled,
+				submitNewUrls: config.submitNewUrls ?? true,
+				submitChangedUrls: config.submitChangedUrls ?? true,
 			};
 		} catch (error) {
 			return {
@@ -188,11 +193,14 @@ async function getIndexNowSettings(site: SiteRow) {
 				lastCheckedAt: existing.lastCheckedAt,
 				lastErrorMessage: `Unable to decrypt IndexNow key: ${getErrorMessage(error)}`,
 				automationEnabled: false,
+				submitNewUrls: true,
+				submitChangedUrls: true,
 			};
 		}
 	}
 
 	const integration = await ensureIndexNowIntegration(site);
+	const config = readPublicConfig(integration.publicConfig);
 	return {
 		status: integration.status,
 		key: integration.key,
@@ -201,6 +209,8 @@ async function getIndexNowSettings(site: SiteRow) {
 		lastCheckedAt: integration.lastCheckedAt,
 		lastErrorMessage: integration.lastErrorMessage,
 		automationEnabled: integration.automationEnabled,
+		submitNewUrls: config.submitNewUrls ?? true,
+		submitChangedUrls: config.submitChangedUrls ?? true,
 	};
 }
 
@@ -455,24 +465,36 @@ async function getEligibleEngines(site: SiteRow, allowManual = false) {
 		return engines;
 	}
 
-	const [indexNow] = await db
-		.select({ id: siteIntegrations.id, status: siteIntegrations.status, automationEnabled: siteIntegrations.automationEnabled })
-		.from(siteIntegrations)
-		.where(and(eq(siteIntegrations.siteId, site.id), eq(siteIntegrations.provider, "indexnow")))
-		.limit(1);
+	const [indexNowInt, bingInt] = await Promise.all([
+		db
+			.select({ status: siteIntegrations.status, automationEnabled: siteIntegrations.automationEnabled })
+			.from(siteIntegrations)
+			.where(and(eq(siteIntegrations.siteId, site.id), eq(siteIntegrations.provider, "indexnow")))
+			.limit(1)
+			.then(([row]) => row || null),
+		db
+			.select({ status: siteIntegrations.status, automationEnabled: siteIntegrations.automationEnabled })
+			.from(siteIntegrations)
+			.where(and(eq(siteIntegrations.siteId, site.id), eq(siteIntegrations.provider, "bing")))
+			.limit(1)
+			.then(([row]) => row || null),
+	]);
 
-	if (indexNow?.status === "verified" && (allowManual || indexNow.automationEnabled)) {
+	if (indexNowInt?.status === "verified" && (allowManual || indexNowInt.automationEnabled)) {
 		engines.push("indexnow");
 	}
 
-	const [bing] = await db
-		.select({ id: userIntegrations.id, status: userIntegrations.status })
+	const [bingUserInt] = await db
+		.select({ status: userIntegrations.status })
 		.from(userIntegrations)
 		.where(and(eq(userIntegrations.userId, site.userId), eq(userIntegrations.provider, "bing")))
 		.limit(1);
 
-	if (bing?.status === "verified") {
-		engines.push("bing");
+	if (bingUserInt?.status === "verified") {
+		const bingEnabled = bingInt ? bingInt.automationEnabled : true;
+		if (allowManual || bingEnabled) {
+			engines.push("bing");
+		}
 	}
 
 	return engines;
@@ -592,8 +614,24 @@ async function syncSitemapSource(site: SiteRow, source: SiteSitemapRow) {
 			changedRows.push({ id: existing.id, loc: existing.loc });
 		}
 
-		const queuedNew = await enqueueUrlRows(site, insertedRows, "new");
-		const queuedChanged = await enqueueUrlRows(site, changedRows, "changed");
+		const [indexNowInt] = await db
+			.select({ publicConfig: siteIntegrations.publicConfig })
+			.from(siteIntegrations)
+			.where(and(eq(siteIntegrations.siteId, site.id), eq(siteIntegrations.provider, "indexnow")))
+			.limit(1);
+		const config = indexNowInt ? readPublicConfig(indexNowInt.publicConfig) : {};
+		const submitNew = config.submitNewUrls ?? true;
+		const submitChanged = config.submitChangedUrls ?? true;
+
+		let queuedNew = 0;
+		if (submitNew && insertedRows.length > 0) {
+			queuedNew = await enqueueUrlRows(site, insertedRows, "new");
+		}
+
+		let queuedChanged = 0;
+		if (submitChanged && changedRows.length > 0) {
+			queuedChanged = await enqueueUrlRows(site, changedRows, "changed");
+		}
 
 		await Promise.all([
 			db
@@ -928,7 +966,7 @@ export async function getSiteSettings(userId: string, siteId: string) {
 		return null;
 	}
 
-	const [sitemapSources, indexNow, bing] = await Promise.all([
+	const [sitemapSources, indexNow, bing, bingSiteInt, googleSiteInt] = await Promise.all([
 		db
 			.select()
 			.from(siteSitemaps)
@@ -940,6 +978,18 @@ export async function getSiteSettings(userId: string, siteId: string) {
 			.from(userIntegrations)
 			.where(and(eq(userIntegrations.userId, userId), eq(userIntegrations.provider, "bing")))
 			.limit(1),
+		db
+			.select()
+			.from(siteIntegrations)
+			.where(and(eq(siteIntegrations.siteId, siteId), eq(siteIntegrations.provider, "bing")))
+			.limit(1)
+			.then(([row]) => row || null),
+		db
+			.select()
+			.from(siteIntegrations)
+			.where(and(eq(siteIntegrations.siteId, siteId), eq(siteIntegrations.provider, "google")))
+			.limit(1)
+			.then(([row]) => row || null),
 	]);
 	const [bingIntegration] = bing;
 	let bingKey: string | null = null;
@@ -963,7 +1013,87 @@ export async function getSiteSettings(userId: string, siteId: string) {
 					verifiedAt: bingIntegration.verifiedAt,
 					lastCheckedAt: bingIntegration.lastCheckedAt,
 					lastErrorMessage: bingErrorMessage,
+					automationEnabled: bingSiteInt ? bingSiteInt.automationEnabled : true,
 				}
 			: null,
+		google: {
+			automationEnabled: googleSiteInt ? googleSiteInt.automationEnabled : false,
+		},
 	};
+}
+
+export async function updateEngineAutomationForUser(userId: string, siteId: string, provider: string, enabled: boolean) {
+	const site = await getSiteForUser(siteId, userId);
+	if (!site) {
+		throw new Error("Site not found");
+	}
+
+	if (provider === "indexnow" && enabled) {
+		const [indexNow] = await db
+			.select()
+			.from(siteIntegrations)
+			.where(and(eq(siteIntegrations.siteId, siteId), eq(siteIntegrations.provider, "indexnow")))
+			.limit(1);
+		if (!indexNow || indexNow.status !== "verified") {
+			throw new Error("Verify the IndexNow key before enabling automation.");
+		}
+	}
+
+	if (provider === "bing" && enabled) {
+		const [bingUserInt] = await db
+			.select()
+			.from(userIntegrations)
+			.where(and(eq(userIntegrations.userId, userId), eq(userIntegrations.provider, "bing")))
+			.limit(1);
+		if (!bingUserInt || bingUserInt.status !== "verified") {
+			throw new Error("Verify the Bing Webmaster API key in user settings first.");
+		}
+	}
+
+	const now = new Date();
+	await db
+		.insert(siteIntegrations)
+		.values({
+			siteId,
+			provider,
+			status: provider === "indexnow" ? "pending" : "verified",
+			automationEnabled: enabled,
+			createdAt: now,
+			updatedAt: now,
+		})
+		.onConflictDoUpdate({
+			target: [siteIntegrations.siteId, siteIntegrations.provider],
+			set: {
+				automationEnabled: enabled,
+				updatedAt: now,
+			},
+		});
+}
+
+export async function updateUrlSubmissionRulesForUser(
+	userId: string,
+	siteId: string,
+	submitNewUrls: boolean,
+	submitChangedUrls: boolean
+) {
+	const site = await getSiteForUser(siteId, userId);
+	if (!site) {
+		throw new Error("Site not found");
+	}
+
+	const integration = await ensureIndexNowIntegration(site);
+	const config = readPublicConfig(integration.publicConfig);
+	const updatedConfig = {
+		...config,
+		submitNewUrls,
+		submitChangedUrls,
+	};
+
+	await db
+		.update(siteIntegrations)
+		.set({
+			publicConfig: updatedConfig,
+			updatedAt: new Date(),
+		})
+		.where(eq(siteIntegrations.id, integration.id));
 }
