@@ -1,6 +1,6 @@
 {
   "name": "indexfast",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Official IndexFast CLI for automated indexing and SEO operations",
   "main": "./bin/indexfast.js",
   "bin": {
@@ -14,7 +14,8 @@
   },
   "preferGlobal": true,
   "scripts": {
-    "start": "node ./bin/indexfast.js"
+    "start": "node ./bin/indexfast.js",
+    "postinstall": "node ./bin/postinstall.js"
   },
   "keywords": [
     "seo",
