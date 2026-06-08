@@ -2,56 +2,56 @@ export function Features() {
 	const features = [
 		{
 			title: "Sitemap Autopilot",
-			desc: "Sync sitemaps automatically and detect new, changed, or removed URLs on a schedule.",
+			desc: "Continuously parse sitemaps on a schedule to discover new paths, verify changes, and log indexation status.",
 		},
 		{
-			title: "Bulk URL Import",
-			desc: "Upload thousands of URLs via CSV or paste list for batch indexing checks.",
+			title: "Bulk URL Ingestion",
+			desc: "Import thousands of target URLs via CSV uploads or plaintext lists to run instant crawl audits.",
 		},
 		{
-			title: "MCP Server",
-			desc: "Expose list_sites, sync_sitemap, submit_url, diagnostics, alerts, resources, and launch prompts to agentic IDEs.",
+			title: "Model Context Protocol",
+			desc: "Expose site details, sitemap trees, diagnostics tools, and recovery prompts directly to AI agent environments.",
 		},
 		{
-			title: "IndexFast CLI",
-			desc: "Run site add, sitemap discover, sitemap sync, submit, diagnose, alerts, resources, and MCP install from terminal workflows.",
+			title: "Developer CLI",
+			desc: "Manage site settings, trigger manual syncs, and integrate diagnostics directly into terminal scripts.",
 		},
 		{
 			title: "Indexability Diagnostics",
-			desc: "Detect noindex, canonical conflicts, robots.txt blocks, redirect chains, and 404s.",
+			desc: "Examine HTTP response headers, canonical definitions, robots.txt blocks, redirects, and noindex tags.",
 		},
 		{
-			title: "IndexNow Automation",
-			desc: "Automatically notify Bing and supported search engines when URLs change.",
+			title: "IndexNow Integration",
+			desc: "Broadcast newly created or updated content to Bing and IndexNow partners the moment it goes live.",
 		},
 		{
-			title: "API Keys & Scopes",
-			desc: "Create hashed API keys with dashboard, API, MCP, resources, and billing-aware access scopes.",
+			title: "Hashed API Access",
+			desc: "Generate secure, scoped API credentials to safely expose specific sites and tools to internal apps.",
 		},
 		{
-			title: "Free SEO Resources",
-			desc: "Use 100+ prioritized directories and curated third-party tools with deep links, effort notes, and launch checklists.",
+			title: "SEO Directory Hub",
+			desc: "Expose 100+ high-authority submission platforms categorized by impact, effort level, and category.",
 		},
 		{
-			title: "REST API",
-			desc: "Integrate sites, sitemaps, URLs, diagnostics, submissions, and resource data into internal tools.",
+			title: "REST Engine",
+			desc: "Build custom integrations utilizing clean JSON endpoints for site listings, queues, and diagnostics logs.",
 		},
 		{
-			title: "DodoPayments Billing",
-			desc: "Gate API, CLI, MCP, queue priority, and agency workflows by tier with checkout and customer portal routes.",
+			title: "Flexible Plan Gates",
+			desc: "Leverage DodoPayments checkout flow to configure specific queue priority, CLI/MCP access, and site limits.",
 		},
 		{
 			title: "Google API Guardrails",
-			desc: "Support Google Indexing API only for eligible JobPosting and livestream pages, with structured-data checks.",
+			desc: "Enforce compliance with Google policies by routing Indexing API requests only to eligible structured pages.",
 		},
 		{
-			title: "pSEO Launch Monitoring",
-			desc: "Track indexing progress in real time as you launch programmatic SEO pages.",
+			title: "pSEO Analytics",
+			desc: "Track and visualize discovery speed as you deploy thousands of programmatic SEO landing pages.",
 		},
 	];
 
 	return (
-		<section className="py-20 sm:py-24" id="features" aria-labelledby="features-heading">
+		<section className="py-20 sm:py-24 border-b border-border/40" id="features" aria-labelledby="features-heading">
 			<div className="mx-auto max-w-6xl px-4 sm:px-6">
 				<p className="label-mono">Features</p>
 				<h2 id="features-heading" className="display mt-3 max-w-3xl text-4xl sm:text-5xl">
@@ -59,23 +59,22 @@ export function Features() {
 					<span className="text-highlight">operate indexing at launch speed.</span>
 				</h2>
 				<p className="mt-5 max-w-2xl text-lg text-muted">
-					A complete toolkit for technical SEO teams and AI agents: dashboard,
-					automation, resources, API, MCP, CLI, billing, and guardrails.
+					A professional infrastructure for technical teams: responsive dashboard, robust REST API, secure MCP server, local CLI, and background automation.
 				</p>
-				<div className="mt-12 grid gap-px bg-ink/10 sm:grid-cols-2 lg:grid-cols-3">
+				
+				<div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
 					{features.map((f) => (
 						<div
 							key={f.title}
-							className="group bg-surface p-6 transition-colors hover:bg-accent"
+							className="group border border-border/50 bg-card/30 p-6 transition-all duration-300 hover:-translate-y-1 hover:bg-card hover:border-border/80 hover:shadow-sm rounded-sm"
 						>
-							<div className="mb-4 flex h-9 w-9 items-center justify-center border border-ink text-ink group-hover:border-accent-foreground group-hover:text-accent-foreground">
-								<svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-									<rect x="1" y="1" width="16" height="16" stroke="currentColor" strokeWidth="1.5" />
-									<path d="M5 9l3 3 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+							<div className="mb-4 flex h-8 w-8 items-center justify-center rounded-sm bg-accent/10 text-ink group-hover:bg-accent group-hover:text-accent-foreground transition-all duration-300">
+								<svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+									<path d="M3 7l3 3 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
 								</svg>
 							</div>
-							<h3 className="text-base font-bold group-hover:text-accent-foreground">{f.title}</h3>
-							<p className="mt-2 text-sm leading-relaxed text-muted group-hover:text-accent-foreground/70">{f.desc}</p>
+							<h3 className="text-base font-bold text-ink">{f.title}</h3>
+							<p className="mt-2 text-xs leading-relaxed text-muted">{f.desc}</p>
 						</div>
 					))}
 				</div>

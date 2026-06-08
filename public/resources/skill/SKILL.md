@@ -41,9 +41,9 @@ Use this skill when a user wants to improve search visibility, audit indexing pr
 
 ### Agentic SEO Setup
 
-1. Create an IndexFast API key with `mcp:use`, `sites:read`, `sites:write`, `submissions:write`, `diagnostics:write`, and `resources:read`.
-2. Add the MCP server to the user's AI IDE config.
-3. Use IndexFast resources to build a launch checklist.
+1. Generate an IndexFast API key directly inside the `/dashboard/mcp` console (automatically configured with `mcp:use` and default data scopes).
+2. Copy and add the generated MCP server config block to the user's AI IDE config (Cursor, Claude Desktop).
+3. Use IndexFast resources and MCP tools to automate site indexing checks.
 
 ## CLI Commands (Zero-install)
 
@@ -75,5 +75,7 @@ You can use the CLI in GitHub Actions or Vercel deployments:
 - `run_diagnostics`
 - `list_alerts`
 - `list_submissions`
+- `list_urls`
+- `list_seo_tools`
 - `list_directories`
 - `recommend_seo_resources`

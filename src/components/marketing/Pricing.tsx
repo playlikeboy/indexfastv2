@@ -5,8 +5,8 @@ const plans = [
 		name: "Free",
 		price: "$0",
 		period: "",
-		desc: "For personal projects and quick checks.",
-		features: ["1 site", "Limited API", "Free tools", "Basic diagnostics"],
+		desc: "Test indexing limits and configurations.",
+		features: ["1 web property", "Limited API access", "All free tools", "Basic diagnostics"],
 		cta: "Start free",
 		productEnv: null,
 		highlight: false,
@@ -15,9 +15,9 @@ const plans = [
 		name: "Indie",
 		price: "$19",
 		period: "/mo",
-		desc: "For indie hackers and solo builders.",
-		features: ["3 sites", "CLI access", "Basic API", "Daily sitemap sync"],
-		cta: "Start Indie plan",
+		desc: "For solo builders and indie hackers.",
+		features: ["3 web properties", "IndexFast CLI", "Basic API access", "Daily sitemap sync"],
+		cta: "Deploy Indie",
 		productEnv: "DODO_PRODUCT_ID_INDIE",
 		highlight: false,
 	},
@@ -25,9 +25,9 @@ const plans = [
 		name: "Growth",
 		price: "$49",
 		period: "/mo",
-		desc: "For growing sites and small teams.",
-		features: ["10 sites", "MCP access", "Higher API limits", "IndexNow + Bing automation", "Alerts"],
-		cta: "Start Growth plan",
+		desc: "Ideal gateway for AI operators and teams.",
+		features: ["10 web properties", "Model Context Protocol", "Higher API limits", "Hourly sitemap syncs", "Slack/Webhook alerts"],
+		cta: "Deploy Growth",
 		productEnv: "DODO_PRODUCT_ID_GROWTH",
 		highlight: true,
 	},
@@ -35,9 +35,9 @@ const plans = [
 		name: "Agency",
 		price: "$99",
 		period: "/mo",
-		desc: "For agencies managing multiple clients.",
-		features: ["30 sites", "Client workflows", "Bulk resources", "Team access", "Priority queue"],
-		cta: "Start Agency plan",
+		desc: "For agency teams audit managing clients.",
+		features: ["30 web properties", "Client workspaces", "Bulk checks", "Priority queue placement", "Dedicated webhook delivery"],
+		cta: "Deploy Agency",
 		productEnv: "DODO_PRODUCT_ID_AGENCY",
 		highlight: false,
 	},
@@ -45,9 +45,9 @@ const plans = [
 		name: "Scale",
 		price: "$249",
 		period: "/mo",
-		desc: "For large sites and power users.",
-		features: ["100 sites", "Scale API", "Webhooks", "Higher queue priority", "Advanced automation"],
-		cta: "Start Scale plan",
+		desc: "Built for massive programmatic seo blogs.",
+		features: ["100 web properties", "Custom webhook events", "Unlimited checks", "Max queue speed", "Priority support"],
+		cta: "Deploy Scale",
 		productEnv: "DODO_PRODUCT_ID_SCALE",
 		highlight: false,
 	},
@@ -64,7 +64,7 @@ function getCheckoutHref(productEnv: string | null) {
 
 export function Pricing() {
 	return (
-		<section className="bg-card py-20 sm:py-24" id="pricing" aria-labelledby="pricing-heading">
+		<section className="py-20 sm:py-24 bg-card/20 border-b border-border/40" id="pricing" aria-labelledby="pricing-heading">
 			<div className="mx-auto max-w-6xl px-4 sm:px-6">
 				<p className="label-mono">Pricing</p>
 				<h2 id="pricing-heading" className="display mt-3 max-w-2xl text-4xl sm:text-5xl">
@@ -72,42 +72,67 @@ export function Pricing() {
 					<span className="text-highlight">every scale.</span>
 				</h2>
 				<p className="mt-5 max-w-2xl text-lg text-muted">
-					Start free. Upgrade when you need CLI, MCP, higher API limits, client
-					workflows, queue priority, or billing-backed automation.
+					Deploy the indexation console for free. Upgrade to unlock CLI execution, remote MCP connectivity, hourly syncs, and premium queue processing.
 				</p>
-				<div className="mt-12 grid gap-px bg-ink/15 sm:grid-cols-2 lg:grid-cols-5">
+				
+				<div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-5 lg:items-stretch">
 					{plans.map((plan) => (
 						<div
 							key={plan.name}
-							className={`relative flex flex-col p-6 ${
-								plan.highlight ? "bg-accent" : "bg-surface"
+							className={`relative flex flex-col justify-between p-6 rounded-sm transition-all duration-300 hover:-translate-y-1 ${
+								plan.highlight 
+									? "border-2 border-accent bg-zinc-950 dark:bg-zinc-900 text-zinc-100 shadow-xl lg:scale-105 z-10" 
+									: "border border-border/50 bg-surface/50 hover:bg-surface hover:border-border"
 							}`}
 						>
-							{plan.highlight && (
-								<span className="label-mono mb-3 text-accent-foreground">Most popular</span>
-							)}
-							<h3 className={`text-sm font-bold uppercase tracking-wide ${plan.highlight ? "text-accent-foreground" : ""}`}>{plan.name}</h3>
-							<div className="mt-3 flex items-baseline gap-1">
-								<span className={`stat text-4xl ${plan.highlight ? "text-accent-foreground" : "text-ink"}`}>{plan.price}</span>
-								{plan.period && <span className={`text-sm ${plan.highlight ? "text-accent-foreground/60" : "text-muted"}`}>{plan.period}</span>}
+							<div>
+								{plan.highlight && (
+									<span className="font-mono text-[9px] font-bold uppercase tracking-wider text-accent bg-accent/10 px-2 py-0.5 rounded-sm w-fit block mb-4">
+										Recommended
+									</span>
+								)}
+								<h3 className={`text-sm font-bold uppercase tracking-wide ${plan.highlight ? "text-zinc-100" : "text-ink"}`}>
+									{plan.name}
+								</h3>
+								<div className="mt-4 flex items-baseline gap-1">
+									<span className={`stat text-4xl ${plan.highlight ? "text-accent" : "text-ink"}`}>
+										{plan.price}
+									</span>
+									{plan.period && (
+										<span className={`text-xs ${plan.highlight ? "text-zinc-400" : "text-muted"}`}>
+											{plan.period}
+										</span>
+									)}
+								</div>
+								<p className={`mt-3 text-xs leading-relaxed ${plan.highlight ? "text-zinc-400" : "text-muted"}`}>
+									{plan.desc}
+								</p>
+								
+								<ul className="mt-6 space-y-3">
+									{plan.features.map((f) => (
+										<li key={f} className="flex items-start gap-2 text-xs">
+											<svg 
+												width="12" 
+												height="12" 
+												viewBox="0 0 14 14" 
+												fill="none" 
+												className={`mt-0.5 shrink-0 ${plan.highlight ? "text-accent" : "text-ink"}`} 
+												aria-hidden="true"
+											>
+												<path d="M3 7l3 3 5-5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+											</svg>
+											<span className={plan.highlight ? "text-zinc-300" : "text-muted"}>{f}</span>
+										</li>
+									))}
+								</ul>
 							</div>
-							<p className={`mt-2 text-xs ${plan.highlight ? "text-accent-foreground/70" : "text-muted"}`}>{plan.desc}</p>
-							<ul className="mt-5 flex-1 space-y-2.5">
-								{plan.features.map((f) => (
-									<li key={f} className="flex items-start gap-2 text-xs">
-										<svg width="14" height="14" viewBox="0 0 14 14" fill="none" className={`mt-0.5 shrink-0 ${plan.highlight ? "text-accent-foreground" : "text-ink"}`} aria-hidden="true">
-											<path d="M3 7l3 3 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-										</svg>
-										<span className={plan.highlight ? "text-accent-foreground/80" : "text-muted"}>{f}</span>
-									</li>
-								))}
-							</ul>
+							
 							<Link
 								href={getCheckoutHref(plan.productEnv)}
-								className={`mt-6 inline-flex items-center justify-center px-4 py-2.5 text-sm font-semibold transition-colors ${
+								className={`mt-8 inline-flex items-center justify-center rounded-sm px-4 py-2.5 text-xs font-mono font-bold uppercase tracking-wider transition-all ${
 									plan.highlight
-										? "bg-accent-foreground text-accent hover:opacity-85"
-										: "border border-ink text-ink hover:bg-ink hover:text-surface"
+										? "bg-accent text-accent-foreground hover:bg-accent-dark hover:shadow-md"
+										: "border border-ink text-ink hover:bg-ink hover:text-surface hover:shadow-md"
 								}`}
 							>
 								{plan.cta}
@@ -115,9 +140,9 @@ export function Pricing() {
 						</div>
 					))}
 				</div>
-				<p className="mt-8 text-sm text-muted">
-					Checkout and customer portal are wired through DodoPayments. API, CLI, MCP,
-					and queue limits are tied to billing tier.
+				
+				<p className="mt-8 text-xs text-muted text-center lg:text-left">
+					* Billing workflows, checkouts, and customer portal transitions are handled securely through DodoPayments.
 				</p>
 			</div>
 		</section>
