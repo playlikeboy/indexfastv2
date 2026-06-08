@@ -16,14 +16,12 @@
 		"global_fetch_strictly_public"
 	],
 	"observability": {
-    "logs": {
-      "enabled": true,
-      "invocation_logs": true
-    },
-    "traces": {
-      "enabled": false
-    }
-  },
+		"enabled": true,
+		"logs": {
+			"enabled": true,
+			"invocation_logs": true
+		}
+	},
 	"assets": {
 		"binding": "ASSETS",
 		"directory": ".open-next/assets"
