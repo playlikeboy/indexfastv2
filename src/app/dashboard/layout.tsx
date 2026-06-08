@@ -1,17 +1,12 @@
 import React from "react";
 import { stack } from "@/stack";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { LogOut, Settings } from "lucide-react";
 import { ThemeToggle } from "@/components/marketing/ThemeToggle";
 import { SidebarNav } from "@/components/dashboard/SidebarNav";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
-	const user = await stack.getUser();
-
-	if (!user) {
-		redirect("/handler/sign-in");
-	}
+	const user = await stack.getUser({ or: "redirect" });
 
 	return (
 		<div className="flex min-h-screen flex-col bg-surface text-ink md:flex-row md:h-screen md:overflow-hidden">
