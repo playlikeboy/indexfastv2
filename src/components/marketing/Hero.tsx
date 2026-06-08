@@ -6,15 +6,13 @@ export function Hero() {
 			<div className="mx-auto max-w-6xl px-4 sm:px-6">
 				<div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
 					<div className="max-w-xl">
-						<p className="label-mono mb-5">MCP + CLI + API indexing ops</p>
+						<p className="label-mono mb-5">Autonomous SEO Infrastructure for AI Operators</p>
 						<h1 className="display text-5xl sm:text-6xl lg:text-7xl">
-							Agent-ready indexing ops for sites that{" "}
+							Sitemap indexing on autopilot for sites that{" "}
 							<span className="text-highlight">publish fast.</span>
 						</h1>
 						<p className="mt-6 text-lg leading-relaxed text-muted">
-							IndexFast gives teams and AI agents one command center for sitemap discovery,
-							IndexNow automation, Bing submission, diagnostics, API keys, MCP tools, and
-							launch resource workflows.
+							IndexFast is the world's first agent-first indexing ops platform. Equip your web properties, CMS pipelines, and AI developers with sitemap BFS parsing, instant IndexNow/Bing push queues, and edge-native diagnostics.
 						</p>
 						<div className="mt-8 flex flex-col gap-3 sm:flex-row">
 							<Link
@@ -37,8 +35,7 @@ export function Hero() {
 							</Link>
 						</div>
 						<p className="mt-4 text-sm text-muted">
-							No fake Google guarantees, no backlink spam — just agent-friendly
-							indexing operations.
+							Zero bloat, zero crawler delay — just pure, high-performance edge infrastructure built for the next generation of web publishing.
 						</p>
 					</div>
 					<DashboardMockup />
@@ -50,35 +47,35 @@ export function Hero() {
 
 function DashboardMockup() {
 	return (
-		<div className="border border-ink bg-card p-4 sm:p-6" id="demo">
+		<div className="border border-ink bg-card p-4 sm:p-6 shadow-xl" id="demo">
 			<div className="mb-5 flex items-center justify-between border-b border-ink/15 pb-4">
-				<span className="label-mono text-ink">Agent Ops Console</span>
+				<span className="label-mono text-ink">Autonomous Agent Ops Console</span>
 				<span className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-ink">
-					<span className="h-2 w-2 bg-accent" />
-					Automation on
+					<span className="h-2 w-2 bg-accent animate-pulse" />
+					Autopilot Active
 				</span>
 			</div>
 			<div className="grid grid-cols-3 gap-px bg-ink/15">
-				<StatCard label="Sites" value="38" />
-				<StatCard label="API Keys" value="12" />
-				<StatCard label="MCP Tools" value="10" />
-				<StatCard label="Queued URLs" value="842" />
+				<StatCard label="Sites Connected" value="48" />
+				<StatCard label="API Keys" value="24" />
+				<StatCard label="MCP Tools Active" value="12" />
+				<StatCard label="URLs Submitted" value="98,421" />
 				<StatCard label="Directories" value="100+" />
-				<StatCard label="Ops Health" value="91%" accent />
+				<StatCard label="Avg Discovery Latency" value="&lt; 1 min" accent />
 			</div>
 			<div className="mt-5">
 				<div className="mb-2 flex items-center justify-between">
-					<span className="label-mono">Launch Readiness</span>
-					<span className="text-sm font-bold text-ink">91.4%</span>
+					<span className="label-mono">Crawler Sync Health</span>
+					<span className="text-sm font-bold text-ink">99.8%</span>
 				</div>
 				<div className="h-2 w-full overflow-hidden bg-ink/10">
-					<div className="h-2 bg-accent" style={{ width: "91.4%" }} />
+					<div className="h-2 bg-accent" style={{ width: "99.8%" }} />
 				</div>
 			</div>
 			<div className="mt-5 space-y-px bg-ink/15">
-				<UrlRow url="indexfast site add 30tools.com" status="CLI" />
-				<UrlRow url="mcp.submit_url /launch/new-page" status="MCP" />
-				<UrlRow url="POST /api/v1/sites/:id/sitemaps" status="API" />
+				<UrlRow url="npx indexfast login --api-key if_live_..." status="CLI" />
+				<UrlRow url="mcp.submit_url /launch/new-saas-guide" status="MCP" />
+				<UrlRow url="POST /api/v1/sites/75396243/sitemaps" status="API" />
 			</div>
 		</div>
 	);

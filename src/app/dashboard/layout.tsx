@@ -14,8 +14,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
 	}
 
 	return (
-		<div className="flex min-h-screen flex-col bg-surface text-ink md:flex-row">
-			<aside className="flex w-full shrink-0 flex-col border-b border-border bg-card md:w-72 md:border-b-0 md:border-r">
+		<div className="flex min-h-screen flex-col bg-surface text-ink md:flex-row md:h-screen md:overflow-hidden">
+			<aside className="flex w-full shrink-0 flex-col border-b border-border bg-card md:w-72 md:border-b-0 md:border-r md:h-full md:overflow-y-auto">
 				<div className="flex items-center justify-between border-b border-border bg-accent px-5 py-5 text-accent-foreground">
 					<Link href="/" className="font-mono text-xl font-black uppercase tracking-wider">
 						Index<span className="ml-1 bg-ink px-1.5 py-0.5 font-sans italic text-surface">Fast</span>
@@ -48,12 +48,12 @@ export default async function DashboardLayout({ children }: { children: React.Re
 				</div>
 			</aside>
 
-			<div className="flex min-w-0 flex-1 flex-col">
+			<div className="flex min-w-0 flex-1 flex-col md:h-full md:overflow-hidden">
 				<header className="flex items-center justify-between border-b border-border bg-card px-6 py-4">
 					<div className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase text-muted">
 						<span>Dashboard</span>
 						<span className="opacity-45">/</span>
-						<span className="text-ink">Command Center</span>
+						<span className="text-ink">Overview</span>
 					</div>
 
 					<div className="flex items-center gap-4">

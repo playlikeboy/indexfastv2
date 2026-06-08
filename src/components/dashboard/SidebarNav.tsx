@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { AlertTriangle, CreditCard, Globe, KeyRound, LayoutDashboard, Send, Terminal } from "lucide-react";
+import { AlertTriangle, CreditCard, Globe, KeyRound, LayoutDashboard, Send, Terminal, Library } from "lucide-react";
 
 const navItems = [
 	{ href: "/dashboard", label: "Overview", icon: LayoutDashboard },
@@ -11,6 +11,7 @@ const navItems = [
 	{ href: "/dashboard/billing", label: "Billing", icon: CreditCard },
 	{ href: "/dashboard/api-keys", label: "API Keys", icon: KeyRound },
 	{ href: "/dashboard/mcp", label: "MCP Setup", icon: Terminal },
+	{ href: "/resources", label: "Resources", icon: Library },
 	{ href: "/tools", label: "Free SEO Tools", icon: Globe },
 ];
 
