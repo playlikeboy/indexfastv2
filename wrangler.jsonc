@@ -15,6 +15,15 @@
 		"nodejs_compat",
 		"global_fetch_strictly_public"
 	],
+	"observability": {
+    "logs": {
+      "enabled": true,
+      "invocation_logs": true
+    },
+    "traces": {
+      "enabled": false
+    }
+  },
 	"assets": {
 		"binding": "ASSETS",
 		"directory": ".open-next/assets"
@@ -37,9 +46,6 @@
 			"service": "indexfast"
 		}
 	],
-	"observability": {
-		"enabled": true
-	},
 	"upload_source_maps": true
 	/**
 	 * Smart Placement
