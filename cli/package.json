@@ -1,19 +1,30 @@
 {
   "name": "indexfast",
   "version": "0.1.0",
-  "description": "IndexFast CLI for Agentic SEO operations",
-  "main": "index.js",
+  "description": "Official IndexFast CLI for automated indexing and SEO operations",
+  "main": "./bin/indexfast.js",
   "bin": {
     "indexfast": "./bin/indexfast.js"
   },
+  "files": [
+    "bin"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "preferGlobal": true,
   "scripts": {
     "start": "node ./bin/indexfast.js"
   },
   "keywords": [
     "seo",
     "indexfast",
-    "cli"
+    "cli",
+    "indexing",
+    "indexnow",
+    "bing-webmaster",
+    "google-indexing"
   ],
-  "author": "",
+  "author": "IndexFast Team",
   "license": "MIT"
 }

@@ -112,6 +112,25 @@ const tools = [
 		},
 	},
 	{
+		name: "list_urls",
+		title: "List URLs",
+		description: "List ingested URLs and their indexing/crawling status for a site.",
+		inputSchema: {
+			type: "object",
+			properties: { siteId: { type: "string" }, limit: { type: "number" } },
+			required: ["siteId"],
+		},
+	},
+	{
+		name: "list_seo_tools",
+		title: "List SEO Tools",
+		description: "List prioritized third-party SEO tools.",
+		inputSchema: {
+			type: "object",
+			properties: { priority: { type: "string", enum: ["P0", "P1", "P2", "P3"] } },
+		},
+	},
+	{
 		name: "list_directories",
 		title: "List Directories",
 		description: "List prioritized SEO and launch submission directories.",
@@ -214,6 +233,10 @@ async function callTool(auth: AuthenticatedApiKey, name: string, args: Record<st
 			return textContent(await listAlertsForUser(auth.userId, asNumber(args.limit)));
 		case "list_submissions":
 			return textContent(await listSubmissionsForUser(auth.userId, asString(args.siteId), asNumber(args.limit)));
+		case "list_urls":
+			return textContent(await listUrlsForUser(auth.userId, asString(args.siteId), asNumber(args.limit)));
+		case "list_seo_tools":
+			return textContent(listSeoToolResources(asString(args.priority) as "P0" | "P1" | "P2" | "P3" | undefined));
 		case "list_directories":
 			return textContent(listDirectoryResources(asString(args.priority) as "P0" | "P1" | "P2" | "P3" | undefined));
 		case "recommend_seo_resources":
