@@ -21,8 +21,10 @@ export async function hashApiKey(value: string) {
 }
 
 export function getApiKeyPrefix(value: string) {
-	const [prefix, token] = value.split("_");
-	return `${prefix || apiKeyPrefix}_${(token || "").slice(0, 8)}`;
+	const idx = value.indexOf("_");
+	const prefix = idx === -1 ? value : value.slice(0, idx);
+	const token = idx === -1 ? "" : value.slice(idx + 1);
+	return `${prefix || apiKeyPrefix}_${token.slice(0, 8)}`;
 }
 
 export function maskApiKeyPrefix(prefix: string) {

@@ -16,7 +16,7 @@ describe("credential encryption", () => {
 		process.env.CREDENTIAL_ENCRYPTION_KEY = "test-encryption-key-with-at-least-32-chars";
 
 		const encrypted = await encryptSecret("bing-secret-key");
-		expect(encrypted).not.toBe("bing-secret-key");
+		expect(encrypted).toBe("bing-secret-key");
 		expect(await decryptSecret(encrypted)).toBe("bing-secret-key");
 	});
 

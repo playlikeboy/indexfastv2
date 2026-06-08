@@ -212,6 +212,50 @@ export const blogPosts: BlogPost[] = [
 			},
 		],
 	},
+	{
+		slug: "bing-webmaster-api-key",
+		title: "How to Find and Use your Bing Webmaster API Key",
+		description:
+			"A complete guide to finding your Bing Webmaster Tools API key, configuring permissions, and automating URL submissions.",
+		date: "2026-06-05",
+		readTime: "6 min read",
+		sections: [
+			{
+				heading: "Locate the Bing Webmaster API Key",
+				body: "To get started, sign in to the Bing Webmaster Tools portal. Click the Settings gear icon in the top-right corner, select 'API Access', and then click on 'API Key'. If you do not have a key generated yet, click 'Generate API Key' to create one.",
+			},
+			{
+				heading: "Validate your API Access",
+				body: "Once generated, copy the API key. Keep in mind that for the API key to successfully submit URLs, the target site must be fully verified under the same Bing Webmaster Tools account. You can test your key by making a sample quota request or via IndexFast's integration checker.",
+			},
+			{
+				heading: "Automate submissions with IndexFast",
+				body: "Add your Bing Webmaster API key to your IndexFast integrations dashboard. Once linked, IndexFast automatically syncs your sitemap and submits new, modified, or manually requested URLs directly to Bing's index, bypassing standard crawl delays.",
+			},
+		],
+	},
+	{
+		slug: "indexnow-key-setup",
+		title: "How to Set Up and Verify an IndexNow Key",
+		description:
+			"Step-by-step instructions for generating an IndexNow API key, hosting the key file, and submitting URLs to search engines instantly.",
+		date: "2026-06-03",
+		readTime: "7 min read",
+		sections: [
+			{
+				heading: "What is the IndexNow Protocol?",
+				body: "IndexNow is a lightweight, open protocol supported by search engines like Bing, Yandex, and Seznam. It allows website owners to instantly notify search engines about new, updated, or deleted URLs, ensuring crawl priority is optimized for fresh content.",
+			},
+			{
+				heading: "Generate and host your verification key",
+				body: "An IndexNow key must be a unique hexadecimal or alphanumeric string between 8 and 128 characters. To verify ownership of the domain, you must host a static text file named '{key}.txt' at the root of your website (e.g., https://example.com/{key}.txt) containing the key string as the file body.",
+			},
+			{
+				heading: "Verify and trigger auto-index submission",
+				body: "After uploading the file to your server, input the key and key location in IndexFast. IndexFast will perform a validation fetch to ensure search engines can read it. Once verified, automation will instantly push new sitemap URLs to the IndexNow endpoint.",
+			},
+		],
+	},
 ];
 
 export function getToolBySlug(slug: string) {
