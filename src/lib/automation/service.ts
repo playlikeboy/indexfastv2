@@ -1097,3 +1097,12 @@ export async function updateUrlSubmissionRulesForUser(
 		})
 		.where(eq(siteIntegrations.id, integration.id));
 }
+
+export async function deleteSiteForUser(userId: string, siteId: string) {
+	const site = await getSiteForUser(siteId, userId);
+	if (!site) {
+		throw new Error("Site not found");
+	}
+
+	await db.delete(sites).where(eq(sites.id, siteId));
+}

@@ -2,18 +2,9 @@ import React from "react";
 import { stack } from "@/stack";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { AlertTriangle, CreditCard, Globe, KeyRound, LayoutDashboard, LogOut, Send, Settings, Terminal } from "lucide-react";
+import { LogOut, Settings } from "lucide-react";
 import { ThemeToggle } from "@/components/marketing/ThemeToggle";
-
-const navItems = [
-	{ href: "/dashboard", label: "Overview", icon: LayoutDashboard },
-	{ href: "/dashboard/submissions", label: "Submissions", icon: Send },
-	{ href: "/dashboard/alerts", label: "Alert Center", icon: AlertTriangle },
-	{ href: "/dashboard/billing", label: "Billing", icon: CreditCard },
-	{ href: "/dashboard/api-keys", label: "API Keys", icon: KeyRound },
-	{ href: "/dashboard/mcp", label: "MCP Setup", icon: Terminal },
-	{ href: "/tools", label: "Free SEO Tools", icon: Globe },
-];
+import { SidebarNav } from "@/components/dashboard/SidebarNav";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
 	const user = await stack.getUser();
@@ -37,51 +28,38 @@ export default async function DashboardLayout({ children }: { children: React.Re
 					<div className="truncate font-mono text-sm font-semibold">{user.primaryEmail || "SEO Operator"}</div>
 				</div>
 
-				<nav className="flex flex-1 flex-col gap-2 p-4">
-					{navItems.map((item) => {
-						const Icon = item.icon;
-						return (
-							<Link
-								key={item.href}
-								href={item.href}
-								className="flex items-center gap-3 rounded-md border border-border bg-surface px-3 py-3 font-mono text-sm font-bold uppercase text-ink transition-colors hover:border-ink hover:bg-accent hover:text-accent-foreground"
-							>
-								<Icon className="h-4 w-4" />
-								{item.label}
-							</Link>
-						);
-					})}
+				<SidebarNav />
 
-					<div className="mt-auto flex flex-col gap-2 border-t border-dashed border-border pt-4">
-						<a
-							href={stack.urls.accountSettings}
-							className="flex items-center gap-3 rounded-md px-3 py-2 font-mono text-xs font-bold uppercase text-muted transition-colors hover:bg-surface hover:text-ink"
-						>
-							<Settings className="h-4 w-4" />
-							Account Settings
-						</a>
-						<a
-							href={stack.urls.signOut}
-							className="flex items-center gap-3 rounded-md px-3 py-2 font-mono text-xs font-bold uppercase text-red-600 transition-colors hover:bg-red-50 dark:hover:bg-red-950/30"
-						>
-							<LogOut className="h-4 w-4" />
-							Logout Session
-						</a>
-					</div>
-				</nav>
+				<div className="mt-auto flex flex-col gap-2 p-4 border-t border-dashed border-border pt-4">
+					<a
+						href={stack.urls.accountSettings}
+						className="flex items-center gap-3 rounded-md px-3 py-2 font-mono text-xs font-bold uppercase text-muted transition-colors hover:bg-surface hover:text-ink"
+					>
+						<Settings className="h-4 w-4" />
+						Account Settings
+					</a>
+					<a
+						href={stack.urls.signOut}
+						className="flex items-center gap-3 rounded-md px-3 py-2 font-mono text-xs font-bold uppercase text-red-600 transition-colors hover:bg-red-50 dark:hover:bg-red-950/30"
+					>
+						<LogOut className="h-4 w-4" />
+						Logout Session
+					</a>
+				</div>
 			</aside>
 
 			<div className="flex min-w-0 flex-1 flex-col">
-				<header className="flex flex-col gap-4 border-b border-border bg-card px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
-					<div>
-						<h1 className="text-2xl font-black uppercase tracking-tight">SEO Command Center</h1>
-						<p className="font-mono text-xs text-muted">Sitemap monitoring, IndexNow automation, Bing submissions, and alerts</p>
+				<header className="flex items-center justify-between border-b border-border bg-card px-6 py-4">
+					<div className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase text-muted">
+						<span>Dashboard</span>
+						<span className="opacity-45">/</span>
+						<span className="text-ink">Command Center</span>
 					</div>
 
-					<div className="flex items-center gap-3">
-						<div className="hidden items-center gap-2 rounded-full border border-border bg-surface px-3 py-2 sm:flex">
-							<span className="h-2.5 w-2.5 rounded-full bg-green-500" />
-							<span className="font-mono text-[11px] font-bold uppercase text-muted">Automation ready</span>
+					<div className="flex items-center gap-4">
+						<div className="hidden items-center gap-2 border border-border bg-surface px-3 py-1 sm:flex font-mono text-[10px] uppercase font-bold text-muted">
+							<span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+							Automation Active
 						</div>
 						<ThemeToggle />
 					</div>

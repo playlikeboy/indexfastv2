@@ -92,15 +92,15 @@ export default async function SiteSettingsPage({ params, searchParams }: Setting
 				</div>
 			</div>
 
-			<nav className="flex flex-wrap gap-2">
+			<nav className="flex gap-6 border-b border-border/40 pb-px mb-6">
 				{tabs.map((item) => (
 					<Link
 						key={item.id}
 						href={`/dashboard/sites/${siteId}/settings?tab=${item.id}`}
-						className={`rounded-md border px-4 py-2 font-mono text-xs font-black uppercase transition-colors ${
+						className={`pb-3 font-mono text-xs font-bold uppercase transition-all relative ${
 							activeTab === item.id
-								? "border-accent bg-accent text-accent-foreground"
-								: "border-border bg-card text-muted hover:border-ink hover:text-ink"
+								? "text-ink font-black after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2.5px] after:bg-accent"
+								: "text-muted hover:text-ink"
 						}`}
 					>
 						{item.label}

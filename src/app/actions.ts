@@ -5,6 +5,7 @@ import { alerts, checks, sites, urls, users } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 import { stack } from "@/stack";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { getErrorMessage, getSiteHost, normalizeHost, normalizeSitemapUrl } from "@/lib/url-utils";
 import {
 	addSitemapSourceForUser,
@@ -21,6 +22,7 @@ import {
 	saveIndexNowKeyForUser,
 	updateEngineAutomationForUser,
 	updateUrlSubmissionRulesForUser,
+	deleteSiteForUser,
 } from "@/lib/automation/service";
 import { createApiKeyForUser, revokeApiKeyForUser } from "@/lib/platform/api-keys";
 import { DEFAULT_API_SCOPES, normalizeApiScopes } from "@/lib/platform/plans";
@@ -328,4 +330,19 @@ export async function updateUrlRules(siteId: string, formData: FormData) {
 	const submitChangedUrls = formData.get("submitChangedUrls") === "on";
 	await updateUrlSubmissionRulesForUser(user.id, siteId, submitNewUrls, submitChangedUrls);
 	revalidateSiteDashboard(siteId);
+}
+
+export async function deleteSite(siteId: string) {
+	const user = await getAuthUser();
+	await deleteSiteForUser(user.id, siteId);
+	revalidatePath("/dashboard");
+	redirect("/dashboard");
+}
+
+export async function createMcpApiKey() {
+	const userId = await syncUser();
+	const apiKey = await createApiKeyForUser(userId, "IndexFast MCP Key", DEFAULT_API_SCOPES);
+	revalidatePath("/dashboard/api-keys");
+	revalidatePath("/dashboard/mcp");
+	return apiKey;
 }

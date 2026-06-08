@@ -4,6 +4,7 @@ import { PLAN_LIMITS, normalizeBillingTier } from "@/lib/platform/plans";
 import { getCurrentBilling } from "@/lib/platform/billing";
 import { syncUser } from "@/app/actions";
 import { stack } from "@/stack";
+import { McpKeyManager } from "@/components/dashboard/McpKeyManager";
 
 const endpoint = "https://indexfast.co/api/mcp";
 
@@ -55,31 +56,11 @@ export default async function McpPage() {
 							Current plan: <span className="font-bold text-ink">{tier}</span>. MCP access is{" "}
 							<span className="font-bold text-ink">{mcpEnabled ? "enabled" : "available on Growth and above"}</span>.
 						</p>
-						{activeKey ? (
-							<p className="mt-2 font-mono text-xs text-muted">Active MCP key: {activeKey.maskedKey}</p>
-						) : (
-							<p className="mt-2 text-sm text-muted">
-								Create a key with the <span className="font-mono">mcp:use</span> scope on the{" "}
-								<Link href="/dashboard/api-keys" className="font-semibold text-ink underline underline-offset-4">
-									API keys page
-								</Link>
-								.
-							</p>
-						)}
 					</div>
 
-					<h3 className="mt-6 text-base font-black uppercase tracking-tight">MCP client config</h3>
-					<CodeBlock>{`{
-  "mcpServers": {
-    "indexfast": {
-      "type": "streamable-http",
-      "url": "${endpoint}",
-      "headers": {
-        "Authorization": "Bearer YOUR_INDEXFAST_API_KEY"
-      }
-    }
-  }
-}`}</CodeBlock>
+					<div className="mt-6">
+						<McpKeyManager activeKey={activeKey || null} endpoint={endpoint} />
+					</div>
 
 					<h3 className="mt-6 text-base font-black uppercase tracking-tight">Install CLI</h3>
 					<CodeBlock>{`npx indexfast login --api-key YOUR_INDEXFAST_API_KEY
