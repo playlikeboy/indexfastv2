@@ -125,12 +125,12 @@ export async function ensureIndexNowIntegration(site: SiteRow) {
 		await db
 			.update(siteIntegrations)
 			.set({
-				publicConfig: { host, keyLocation, storage: "plain" },
+				publicConfig: { ...readPublicConfig(existing.publicConfig), host, keyLocation, storage: "plain" },
 				updatedAt: new Date(),
 			})
 			.where(eq(siteIntegrations.id, existing.id));
 
-		return { ...existing, publicConfig: { host, keyLocation, storage: "plain" }, key, keyLocation };
+		return { ...existing, publicConfig: { ...readPublicConfig(existing.publicConfig), host, keyLocation, storage: "plain" }, key, keyLocation };
 	}
 
 	const key = generateIndexNowKey();
@@ -216,9 +216,7 @@ async function getIndexNowSettings(site: SiteRow) {
 
 export async function saveIndexNowKeyForUser(userId: string, siteId: string, keyLocation: string, key: string) {
 	const site = await getSiteForUser(siteId, userId);
-	if (!site) {
-		throw new Error("Site not found");
-	}
+	if (!site) throw new Error("Site not found");
 
 	const host = getSiteHost(site);
 	const cleanKey = normalizeIndexNowKey(key);
@@ -253,9 +251,7 @@ export async function saveIndexNowKeyForUser(userId: string, siteId: string, key
 
 export async function verifyIndexNowForUser(userId: string, siteId: string) {
 	const site = await getSiteForUser(siteId, userId);
-	if (!site) {
-		throw new Error("Site not found");
-	}
+	if (!site) throw new Error("Site not found");
 
 	const integration = await ensureIndexNowIntegration(site);
 	const result = await verifyIndexNowKey(getSiteHost(site), integration.key, integration.keyLocation);
@@ -269,7 +265,7 @@ export async function verifyIndexNowForUser(userId: string, siteId: string) {
 			lastCheckedAt: now,
 			lastErrorAt: result.ok ? null : now,
 			lastErrorMessage: result.ok ? null : truncateMessage(result.message),
-			publicConfig: { host: getSiteHost(site), keyLocation: result.keyLocation, storage: "plain" },
+			publicConfig: { ...readPublicConfig(integration.publicConfig), host: getSiteHost(site), keyLocation: result.keyLocation, storage: "plain" },
 			updatedAt: now,
 		})
 		.where(eq(siteIntegrations.id, integration.id));
@@ -279,14 +275,10 @@ export async function verifyIndexNowForUser(userId: string, siteId: string) {
 
 export async function saveBingApiKeyForUser(userId: string, siteId: string, apiKey: string) {
 	const site = await getSiteForUser(siteId, userId);
-	if (!site) {
-		throw new Error("Site not found");
-	}
+	if (!site) throw new Error("Site not found");
 
 	const cleanApiKey = apiKey.trim();
-	if (!cleanApiKey) {
-		throw new Error("Bing API key is required");
-	}
+	if (!cleanApiKey) throw new Error("Bing API key is required");
 
 	const siteUrl = getSiteUrl(site);
 	const validation = await getBingSubmissionQuota(cleanApiKey, siteUrl);
@@ -326,16 +318,12 @@ export async function saveBingApiKeyForUser(userId: string, siteId: string, apiK
 }
 
 export async function removeBingApiKeyForUser(userId: string) {
-	await db
-		.delete(userIntegrations)
-		.where(and(eq(userIntegrations.userId, userId), eq(userIntegrations.provider, "bing")));
+	await db.delete(userIntegrations).where(and(eq(userIntegrations.userId, userId), eq(userIntegrations.provider, "bing")));
 }
 
 export async function setAutomationForUser(userId: string, siteId: string, enabled: boolean) {
 	const site = await getSiteForUser(siteId, userId);
-	if (!site) {
-		throw new Error("Site not found");
-	}
+	if (!site) throw new Error("Site not found");
 
 	const [integration] = await db
 		.select()
@@ -350,30 +338,19 @@ export async function setAutomationForUser(userId: string, siteId: string, enabl
 	const now = new Date();
 	await Promise.all([
 		db.update(sites).set({ automationEnabled: enabled, updatedAt: now }).where(eq(sites.id, siteId)),
-		db
-			.update(siteIntegrations)
-			.set({ automationEnabled: enabled, updatedAt: now })
-			.where(and(eq(siteIntegrations.siteId, siteId), eq(siteIntegrations.provider, "indexnow"))),
+		db.update(siteIntegrations).set({ automationEnabled: enabled, updatedAt: now }).where(and(eq(siteIntegrations.siteId, siteId), eq(siteIntegrations.provider, "indexnow"))),
 	]);
 }
 
 export async function addSitemapSourceForUser(userId: string, siteId: string, sitemapUrl: string, isPrimary?: boolean) {
 	const site = await getSiteForUser(siteId, userId);
-	if (!site) {
-		throw new Error("Site not found");
-	}
+	if (!site) throw new Error("Site not found");
 
 	const host = getSiteHost(site);
 	const cleanUrl = normalizeSitemapUrl(sitemapUrl, host);
-	if (!cleanUrl) {
-		throw new Error("Sitemap URL is required");
-	}
+	if (!cleanUrl) throw new Error("Sitemap URL is required");
 
-	const existingSources = await db
-		.select({ id: siteSitemaps.id })
-		.from(siteSitemaps)
-		.where(eq(siteSitemaps.siteId, siteId))
-		.limit(1);
+	const existingSources = await db.select({ id: siteSitemaps.id }).from(siteSitemaps).where(eq(siteSitemaps.siteId, siteId)).limit(1);
 	const makePrimary = isPrimary ?? existingSources.length === 0;
 	const now = new Date();
 
@@ -383,58 +360,30 @@ export async function addSitemapSourceForUser(userId: string, siteId: string, si
 
 	const [source] = await db
 		.insert(siteSitemaps)
-		.values({
-			siteId,
-			url: cleanUrl,
-			isPrimary: makePrimary,
-			status: "active",
-			updatedAt: now,
-		})
+		.values({ siteId, url: cleanUrl, isPrimary: makePrimary, status: "active", updatedAt: now })
 		.onConflictDoUpdate({
 			target: [siteSitemaps.siteId, siteSitemaps.url],
-			set: {
-				isPrimary: makePrimary,
-				status: "active",
-				lastErrorAt: null,
-				lastErrorMessage: null,
-				updatedAt: now,
-			},
+			set: { isPrimary: makePrimary, status: "active", lastErrorAt: null, lastErrorMessage: null, updatedAt: now },
 		})
 		.returning();
 
-	if (makePrimary) {
-		await db.update(sites).set({ sitemapUrl: cleanUrl, updatedAt: now }).where(eq(sites.id, siteId));
-	}
-
+	if (makePrimary) await db.update(sites).set({ sitemapUrl: cleanUrl, updatedAt: now }).where(eq(sites.id, siteId));
 	return source;
 }
 
 export async function removeSitemapSourceForUser(userId: string, sourceId: string) {
 	const [source] = await db
-		.select({
-			id: siteSitemaps.id,
-			siteId: siteSitemaps.siteId,
-			isPrimary: siteSitemaps.isPrimary,
-		})
+		.select({ id: siteSitemaps.id, siteId: siteSitemaps.siteId, isPrimary: siteSitemaps.isPrimary })
 		.from(siteSitemaps)
 		.innerJoin(sites, eq(siteSitemaps.siteId, sites.id))
 		.where(and(eq(siteSitemaps.id, sourceId), eq(sites.userId, userId)))
 		.limit(1);
 
-	if (!source) {
-		throw new Error("Sitemap source not found");
-	}
-
+	if (!source) throw new Error("Sitemap source not found");
 	await db.delete(siteSitemaps).where(eq(siteSitemaps.id, sourceId));
 
 	if (source.isPrimary) {
-		const [nextSource] = await db
-			.select({ id: siteSitemaps.id, url: siteSitemaps.url })
-			.from(siteSitemaps)
-			.where(eq(siteSitemaps.siteId, source.siteId))
-			.orderBy(desc(siteSitemaps.createdAt))
-			.limit(1);
-
+		const [nextSource] = await db.select({ id: siteSitemaps.id, url: siteSitemaps.url }).from(siteSitemaps).where(eq(siteSitemaps.siteId, source.siteId)).orderBy(desc(siteSitemaps.createdAt)).limit(1);
 		if (nextSource) {
 			await db.update(siteSitemaps).set({ isPrimary: true, updatedAt: new Date() }).where(eq(siteSitemaps.id, nextSource.id));
 			await db.update(sites).set({ sitemapUrl: nextSource.url, updatedAt: new Date() }).where(eq(sites.id, source.siteId));
@@ -446,57 +395,30 @@ export async function removeSitemapSourceForUser(userId: string, sourceId: strin
 
 export async function discoverSitemapsForUser(userId: string, siteId: string) {
 	const site = await getSiteForUser(siteId, userId);
-	if (!site) {
-		throw new Error("Site not found");
-	}
-
+	if (!site) throw new Error("Site not found");
 	const discovered = await discoverSitemapUrls(getSiteHost(site));
 	for (const [index, sitemapUrl] of discovered.entries()) {
 		await addSitemapSourceForUser(userId, siteId, sitemapUrl, index === 0);
 	}
-
 	return discovered;
 }
 
 async function getEligibleEngines(site: SiteRow, allowManual = false) {
 	const engines: Array<"indexnow" | "bing"> = [];
-
-	if (!allowManual && !site.automationEnabled) {
-		return engines;
-	}
+	if (!allowManual && !site.automationEnabled) return engines;
 
 	const [indexNowInt, bingInt] = await Promise.all([
-		db
-			.select({ status: siteIntegrations.status, automationEnabled: siteIntegrations.automationEnabled })
-			.from(siteIntegrations)
-			.where(and(eq(siteIntegrations.siteId, site.id), eq(siteIntegrations.provider, "indexnow")))
-			.limit(1)
-			.then(([row]) => row || null),
-		db
-			.select({ status: siteIntegrations.status, automationEnabled: siteIntegrations.automationEnabled })
-			.from(siteIntegrations)
-			.where(and(eq(siteIntegrations.siteId, site.id), eq(siteIntegrations.provider, "bing")))
-			.limit(1)
-			.then(([row]) => row || null),
+		db.select({ status: siteIntegrations.status, automationEnabled: siteIntegrations.automationEnabled }).from(siteIntegrations).where(and(eq(siteIntegrations.siteId, site.id), eq(siteIntegrations.provider, "indexnow"))).limit(1).then(([row]) => row || null),
+		db.select({ status: siteIntegrations.status, automationEnabled: siteIntegrations.automationEnabled }).from(siteIntegrations).where(and(eq(siteIntegrations.siteId, site.id), eq(siteIntegrations.provider, "bing"))).limit(1).then(([row]) => row || null),
 	]);
 
-	if (indexNowInt?.status === "verified" && (allowManual || indexNowInt.automationEnabled)) {
-		engines.push("indexnow");
-	}
+	if (indexNowInt?.status === "verified" && (allowManual || indexNowInt.automationEnabled)) engines.push("indexnow");
 
-	const [bingUserInt] = await db
-		.select({ status: userIntegrations.status })
-		.from(userIntegrations)
-		.where(and(eq(userIntegrations.userId, site.userId), eq(userIntegrations.provider, "bing")))
-		.limit(1);
-
+	const [bingUserInt] = await db.select({ status: userIntegrations.status }).from(userIntegrations).where(and(eq(userIntegrations.userId, site.userId), eq(userIntegrations.provider, "bing"))).limit(1);
 	if (bingUserInt?.status === "verified") {
 		const bingEnabled = bingInt ? bingInt.automationEnabled : true;
-		if (allowManual || bingEnabled) {
-			engines.push("bing");
-		}
+		if (allowManual || bingEnabled) engines.push("bing");
 	}
-
 	return engines;
 }
 
@@ -504,229 +426,90 @@ async function enqueueSubmissionJob(siteId: string, url: UrlQueueRow, engine: "i
 	const [existing] = await db
 		.select({ id: submissionJobs.id })
 		.from(submissionJobs)
-		.where(
-			and(
-				eq(submissionJobs.siteId, siteId),
-				eq(submissionJobs.loc, url.loc),
-				eq(submissionJobs.engine, engine),
-				or(eq(submissionJobs.status, "queued"), eq(submissionJobs.status, "processing")),
-			),
-		)
+		.where(and(
+			eq(submissionJobs.siteId, siteId),
+			eq(submissionJobs.loc, url.loc),
+			eq(submissionJobs.engine, engine),
+			or(eq(submissionJobs.status, "queued"), eq(submissionJobs.status, "processing")),
+		))
 		.limit(1);
+	if (existing) return false;
 
-	if (existing) {
-		return false;
-	}
-
-	await db.insert(submissionJobs).values({
-		siteId,
-		urlId: url.id,
-		loc: url.loc,
-		engine,
-		reason,
-		status: "queued",
-	});
-
+	await db.insert(submissionJobs).values({ siteId, urlId: url.id, loc: url.loc, engine, reason, status: "queued" });
 	return true;
 }
 
 async function enqueueUrlRows(site: SiteRow, urlRows: UrlQueueRow[], reason: string, allowManual = false) {
 	const engines = await getEligibleEngines(site, allowManual);
 	let queued = 0;
-
-	for (const engine of engines) {
-		for (const urlRow of urlRows) {
-			if (await enqueueSubmissionJob(site.id, urlRow, engine, reason)) {
-				queued += 1;
-			}
-		}
-	}
-
+	for (const engine of engines) for (const urlRow of urlRows) if (await enqueueSubmissionJob(site.id, urlRow, engine, reason)) queued++;
 	return queued;
 }
 
 async function syncSitemapSource(site: SiteRow, source: SiteSitemapRow) {
 	const host = getSiteHost(site);
 	const now = new Date();
-	const [syncRow] = await db
-		.insert(sitemaps)
-		.values({
-			siteId: site.id,
-			url: source.url,
-			status: "syncing",
-		})
-		.returning();
+	const [syncRow] = await db.insert(sitemaps).values({ siteId: site.id, url: source.url, status: "syncing" }).returning();
 
 	try {
 		const result = await fetchSitemapTree(source.url, host, AUTOMATION_LIMITS.maxUrlsPerSitemap);
-		if (result.urls.length === 0) {
-			throw new Error("No matching URL entries found in the sitemap.");
-		}
+		if (result.urls.length === 0) throw new Error("No matching URL entries found in the sitemap.");
 
 		const locs = result.urls.map((entry) => entry.loc);
-		const existingRows = await db
-			.select({
-				id: urls.id,
-				loc: urls.loc,
-				lastmod: urls.lastmod,
-			})
-			.from(urls)
-			.where(and(eq(urls.siteId, site.id), inArray(urls.loc, locs)));
+		const existingRows = await db.select({ id: urls.id, loc: urls.loc, lastmod: urls.lastmod }).from(urls).where(and(eq(urls.siteId, site.id), inArray(urls.loc, locs)));
 		const existingByLoc = new Map(existingRows.map((row) => [row.loc, row]));
-
 		const newEntries = result.urls.filter((entry) => !existingByLoc.has(entry.loc));
-		const insertedRows =
-			newEntries.length > 0
-				? await db
-						.insert(urls)
-						.values(
-							newEntries.map((entry) => ({
-								siteId: site.id,
-								loc: entry.loc,
-								lastmod: entry.lastmod,
-								changefreq: entry.changefreq,
-								priority: entry.priority || "0.5",
-								indexingStatus: "unknown",
-								gscStatus: "unknown",
-								lastSeenInSitemapAt: now,
-							})),
-						)
-						.onConflictDoNothing({ target: [urls.siteId, urls.loc] })
-						.returning({ id: urls.id, loc: urls.loc })
-				: [];
+		const insertedRows = newEntries.length > 0 ? await db.insert(urls).values(newEntries.map((entry) => ({
+			siteId: site.id, loc: entry.loc, lastmod: entry.lastmod, changefreq: entry.changefreq,
+			priority: entry.priority || "0.5", indexingStatus: "unknown", gscStatus: "unknown", lastSeenInSitemapAt: now,
+		}))).onConflictDoNothing({ target: [urls.siteId, urls.loc] }).returning({ id: urls.id, loc: urls.loc }) : [];
 
 		const changedRows: UrlQueueRow[] = [];
 		for (const entry of result.urls) {
 			const existing = existingByLoc.get(entry.loc);
-			if (!existing || !hasLastmodChanged(existing, entry)) {
-				continue;
-			}
-
-			await db
-				.update(urls)
-				.set({
-					lastmod: entry.lastmod,
-					changefreq: entry.changefreq,
-					priority: entry.priority || "0.5",
-					lastSeenInSitemapAt: now,
-				})
-				.where(eq(urls.id, existing.id));
+			if (!existing || !hasLastmodChanged(existing, entry)) continue;
+			await db.update(urls).set({ lastmod: entry.lastmod, changefreq: entry.changefreq, priority: entry.priority || "0.5", lastSeenInSitemapAt: now }).where(eq(urls.id, existing.id));
 			changedRows.push({ id: existing.id, loc: existing.loc });
 		}
 
-		const [indexNowInt] = await db
-			.select({ publicConfig: siteIntegrations.publicConfig })
-			.from(siteIntegrations)
-			.where(and(eq(siteIntegrations.siteId, site.id), eq(siteIntegrations.provider, "indexnow")))
-			.limit(1);
+		const [indexNowInt] = await db.select({ publicConfig: siteIntegrations.publicConfig }).from(siteIntegrations).where(and(eq(siteIntegrations.siteId, site.id), eq(siteIntegrations.provider, "indexnow"))).limit(1);
 		const config = indexNowInt ? readPublicConfig(indexNowInt.publicConfig) : {};
 		const submitNew = config.submitNewUrls ?? true;
 		const submitChanged = config.submitChangedUrls ?? true;
-
-		let queuedNew = 0;
-		if (submitNew && insertedRows.length > 0) {
-			queuedNew = await enqueueUrlRows(site, insertedRows, "new");
-		}
-
-		let queuedChanged = 0;
-		if (submitChanged && changedRows.length > 0) {
-			queuedChanged = await enqueueUrlRows(site, changedRows, "changed");
-		}
+		const queuedNew = submitNew && insertedRows.length > 0 ? await enqueueUrlRows(site, insertedRows, "new") : 0;
+		const queuedChanged = submitChanged && changedRows.length > 0 ? await enqueueUrlRows(site, changedRows, "changed") : 0;
 
 		await Promise.all([
-			db
-				.update(siteSitemaps)
-				.set({
-					status: "active",
-					lastSyncAt: now,
-					lastErrorAt: null,
-					lastErrorMessage: null,
-					updatedAt: now,
-				})
-				.where(eq(siteSitemaps.id, source.id)),
-			db
-				.update(sitemaps)
-				.set({
-					status: "success",
-					lastSyncTime: now,
-				})
-				.where(eq(sitemaps.id, syncRow.id)),
+			db.update(siteSitemaps).set({ status: "active", lastSyncAt: now, lastErrorAt: null, lastErrorMessage: null, updatedAt: now }).where(eq(siteSitemaps.id, source.id)),
+			db.update(sitemaps).set({ status: "success", lastSyncTime: now }).where(eq(sitemaps.id, syncRow.id)),
 		]);
 
-		return {
-			success: true,
-			sourceId: source.id,
-			urlCount: result.urls.length,
-			insertedCount: insertedRows.length,
-			changedCount: changedRows.length,
-			queuedCount: queuedNew + queuedChanged,
-			truncated: result.truncated,
-		};
+		return { success: true, sourceId: source.id, urlCount: result.urls.length, insertedCount: insertedRows.length, changedCount: changedRows.length, queuedCount: queuedNew + queuedChanged, truncated: result.truncated };
 	} catch (error: unknown) {
 		const message = truncateMessage(getErrorMessage(error));
-
 		await Promise.all([
-			db
-				.update(siteSitemaps)
-				.set({
-					status: "failed",
-					lastErrorAt: now,
-					lastErrorMessage: message,
-					updatedAt: now,
-				})
-				.where(eq(siteSitemaps.id, source.id)),
-			db
-				.update(sitemaps)
-				.set({
-					status: "failed",
-					errorMessage: message,
-					lastSyncTime: now,
-				})
-				.where(eq(sitemaps.id, syncRow.id)),
-			db.insert(alerts).values({
-				siteId: site.id,
-				title: "Sitemap Sync Failed",
-				message: `Unable to sync ${source.url}: ${message}`,
-				alertType: "sitemap_failure",
-				resolved: false,
-			}),
+			db.update(siteSitemaps).set({ status: "failed", lastErrorAt: now, lastErrorMessage: message, updatedAt: now }).where(eq(siteSitemaps.id, source.id)),
+			db.update(sitemaps).set({ status: "failed", errorMessage: message, lastSyncTime: now }).where(eq(sitemaps.id, syncRow.id)),
+			db.insert(alerts).values({ siteId: site.id, title: "Sitemap Sync Failed", message: `Unable to sync ${source.url}: ${message}`, alertType: "sitemap_failure", resolved: false }),
 		]);
-
 		throw error;
 	}
 }
 
 async function syncActiveSitemaps(site: SiteRow, sourceId?: string) {
 	const filters = [eq(siteSitemaps.siteId, site.id), eq(siteSitemaps.status, "active")];
-	if (sourceId) {
-		filters.push(eq(siteSitemaps.id, sourceId));
-	}
-
-	const sources = await db
-		.select()
-		.from(siteSitemaps)
-		.where(and(...filters))
-		.orderBy(desc(siteSitemaps.isPrimary), desc(siteSitemaps.createdAt));
-
-	if (sources.length === 0) {
-		throw new Error("No active sitemap sources configured.");
-	}
+	if (sourceId) filters.push(eq(siteSitemaps.id, sourceId));
+	const sources = await db.select().from(siteSitemaps).where(and(...filters)).orderBy(desc(siteSitemaps.isPrimary), desc(siteSitemaps.createdAt));
+	if (sources.length === 0) throw new Error("No active sitemap sources configured.");
 
 	const failures: string[] = [];
 	const results = [];
-
 	for (const source of sources) {
-		try {
-			results.push(await syncSitemapSource(site, source));
-		} catch (error) {
-			failures.push(getErrorMessage(error));
-		}
+		try { results.push(await syncSitemapSource(site, source)); }
+		catch (error) { failures.push(getErrorMessage(error)); }
 	}
-
 	return {
-		success: failures.length === 0,
-		results,
-		failures,
+		success: failures.length === 0, results, failures,
 		insertedCount: results.reduce((total, result) => total + result.insertedCount, 0),
 		changedCount: results.reduce((total, result) => total + result.changedCount, 0),
 		queuedCount: results.reduce((total, result) => total + result.queuedCount, 0),
@@ -735,84 +518,40 @@ async function syncActiveSitemaps(site: SiteRow, sourceId?: string) {
 
 export async function syncSitemapsForUser(userId: string, siteId: string, sourceId?: string) {
 	const site = await getSiteForUser(siteId, userId);
-	if (!site) {
-		throw new Error("Site not found");
-	}
-
+	if (!site) throw new Error("Site not found");
 	return syncActiveSitemaps(site, sourceId);
 }
 
 export async function enqueueManualSubmissionForUser(userId: string, siteId: string, urlLoc: string) {
 	const site = await getSiteForUser(siteId, userId);
-	if (!site) {
-		throw new Error("Site not found");
-	}
-
+	if (!site) throw new Error("Site not found");
 	const loc = normalizeUrlForHost(urlLoc, getSiteHost(site));
-	const [existingUrl] = await db
-		.select({ id: urls.id, loc: urls.loc })
-		.from(urls)
-		.where(and(eq(urls.siteId, siteId), eq(urls.loc, loc)))
-		.limit(1);
-	const [urlRow] = existingUrl
-		? [existingUrl]
-		: await db
-				.insert(urls)
-				.values({
-					siteId,
-					loc,
-					indexingStatus: "unknown",
-					gscStatus: "unknown",
-					lastSeenInSitemapAt: new Date(),
-				})
-				.onConflictDoUpdate({
-					target: [urls.siteId, urls.loc],
-					set: { lastSeenInSitemapAt: new Date() },
-				})
-				.returning({ id: urls.id, loc: urls.loc });
+	const [existingUrl] = await db.select({ id: urls.id, loc: urls.loc }).from(urls).where(and(eq(urls.siteId, siteId), eq(urls.loc, loc))).limit(1);
+	const [urlRow] = existingUrl ? [existingUrl] : await db.insert(urls).values({
+		siteId, loc, indexingStatus: "unknown", gscStatus: "unknown", lastSeenInSitemapAt: new Date(),
+	}).onConflictDoUpdate({ target: [urls.siteId, urls.loc], set: { lastSeenInSitemapAt: new Date() } }).returning({ id: urls.id, loc: urls.loc });
 
 	const queuedCount = await enqueueUrlRows(site, [urlRow], "manual", true);
-	if (queuedCount === 0) {
-		throw new Error("No verified submission engine is available for this site.");
-	}
-
+	if (queuedCount === 0) throw new Error("No verified submission engine is available for this site.");
 	const processed = await processSubmissionQueue({ siteId, maxJobs: Math.min(queuedCount, 10) });
 	return { queuedCount, processed };
 }
 
 async function submitEngineBatch(siteId: string, engine: string, urlList: string[]) {
 	const [site] = await db.select().from(sites).where(eq(sites.id, siteId)).limit(1);
-	if (!site) {
-		return { ok: false, status: 0, message: "Site not found." };
-	}
+	if (!site) return { ok: false, status: 0, message: "Site not found." };
 
 	if (engine === "indexnow") {
-		const [integration] = await db
-			.select()
-			.from(siteIntegrations)
-			.where(and(eq(siteIntegrations.siteId, siteId), eq(siteIntegrations.provider, "indexnow")))
-			.limit(1);
-
-		if (!integration?.encryptedSecret || integration.status !== "verified") {
-			return { ok: false, status: 0, message: "IndexNow key is not verified." };
-		}
-
+		const [integration] = await db.select().from(siteIntegrations).where(and(eq(siteIntegrations.siteId, siteId), eq(siteIntegrations.provider, "indexnow"))).limit(1);
+		if (!integration?.encryptedSecret || integration.status !== "verified") return { ok: false, status: 0, message: "IndexNow key is not verified." };
 		const key = await readStoredSecret(integration.encryptedSecret);
 		const keyLocation = getConfiguredKeyLocation(integration.publicConfig, getSiteHost(site), key);
 		return submitIndexNowBatch(getSiteHost(site), key, urlList, keyLocation);
 	}
 
 	if (engine === "bing") {
-		const [integration] = await db
-			.select()
-			.from(userIntegrations)
-			.where(and(eq(userIntegrations.userId, site.userId), eq(userIntegrations.provider, "bing")))
-			.limit(1);
-
-		if (!integration?.encryptedSecret || integration.status !== "verified") {
-			return { ok: false, status: 0, message: "Bing API key is not verified." };
-		}
-
+		const [integration] = await db.select().from(userIntegrations).where(and(eq(userIntegrations.userId, site.userId), eq(userIntegrations.provider, "bing"))).limit(1);
+		if (!integration?.encryptedSecret || integration.status !== "verified") return { ok: false, status: 0, message: "Bing API key is not verified." };
 		const apiKey = await readStoredSecret(integration.encryptedSecret);
 		return submitBingBatch(apiKey, getSiteUrl(site), urlList);
 	}
@@ -820,32 +559,43 @@ async function submitEngineBatch(siteId: string, engine: string, urlList: string
 	return { ok: false, status: 0, message: `Unsupported submission engine: ${engine}.` };
 }
 
+/**
+ * Drain due submissions with a best-effort, bounded retry policy.
+ *
+ * Claims use a conditional update against queued status. That makes the claim
+ * atomic: a concurrent cron/manual worker may read the same candidate list,
+ * but only the worker that successfully changes the row from queued to
+ * processing is allowed to submit it.
+ */
 export async function processSubmissionQueue(options: { siteId?: string; maxJobs?: number } = {}) {
 	const now = new Date();
-	const maxJobs = options.maxJobs ?? AUTOMATION_LIMITS.maxSubmissionJobsPerRun;
+	const maxJobs = Math.max(1, Math.min(options.maxJobs ?? AUTOMATION_LIMITS.maxSubmissionJobsPerRun, AUTOMATION_LIMITS.maxSubmissionJobsPerRun));
+	const staleBefore = new Date(now.getTime() - AUTOMATION_LIMITS.staleSubmissionLockMs);
+
+	// Recover jobs interrupted by a worker termination. Requeue only a bounded
+	// number of stale rows per invocation so an outage cannot flood the queue.
+	await db.update(submissionJobs).set({
+		status: "queued", lockedAt: null, nextRunAt: now, updatedAt: now,
+		lastErrorMessage: "Recovered stale processing job after worker interruption.",
+	}).where(and(
+		eq(submissionJobs.status, "processing"),
+		lte(submissionJobs.lockedAt, staleBefore),
+		...(options.siteId ? [eq(submissionJobs.siteId, options.siteId)] : []),
+	));
+
 	const baseFilter = options.siteId
 		? and(eq(submissionJobs.status, "queued"), lte(submissionJobs.nextRunAt, now), eq(submissionJobs.siteId, options.siteId))
 		: and(eq(submissionJobs.status, "queued"), lte(submissionJobs.nextRunAt, now));
-	const jobs = await db
-		.select()
-		.from(submissionJobs)
-		.where(baseFilter)
-		.orderBy(submissionJobs.createdAt)
-		.limit(maxJobs);
+	const candidates = await db.select().from(submissionJobs).where(baseFilter).orderBy(submissionJobs.createdAt).limit(maxJobs);
 
-	if (jobs.length === 0) {
-		return { processedCount: 0, successCount: 0, failedCount: 0 };
+	const jobs = [];
+	for (const candidate of candidates) {
+		const [claimed] = await db.update(submissionJobs).set({
+			status: "processing", lockedAt: now, updatedAt: now,
+		}).where(and(eq(submissionJobs.id, candidate.id), eq(submissionJobs.status, "queued"), lte(submissionJobs.nextRunAt, now))).returning();
+		if (claimed) jobs.push(claimed);
 	}
-
-	await db
-		.update(submissionJobs)
-		.set({ status: "processing", lockedAt: now, updatedAt: now })
-		.where(
-			inArray(
-				submissionJobs.id,
-				jobs.map((job) => job.id),
-			),
-		);
+	if (jobs.length === 0) return { processedCount: 0, successCount: 0, failedCount: 0, retriedCount: 0 };
 
 	const groups = new Map<string, typeof jobs>();
 	for (const job of jobs) {
@@ -857,252 +607,131 @@ export async function processSubmissionQueue(options: { siteId?: string; maxJobs
 
 	let successCount = 0;
 	let failedCount = 0;
+	let retriedCount = 0;
 
 	for (const group of groups.values()) {
 		for (let index = 0; index < group.length; index += AUTOMATION_LIMITS.engineBatchSize) {
 			const batch = group.slice(index, index + AUTOMATION_LIMITS.engineBatchSize);
 			const batchUrlList = batch.map((job) => job.loc);
 			const result = await submitEngineBatch(batch[0].siteId, batch[0].engine, batchUrlList).catch((error) => ({
-				ok: false,
-				status: 0,
-				message: getErrorMessage(error),
+				ok: false, status: 0, message: getErrorMessage(error),
 			}));
-			const status = result.ok ? "success" : "failed";
-			const responseMessage = truncateMessage(result.message);
 			const completedAt = new Date();
+			const responseMessage = truncateMessage(result.message);
+			const nextAttempts = Math.max(...batch.map((job) => job.attempts)) + 1;
+			const shouldRetry = !result.ok && nextAttempts < AUTOMATION_LIMITS.maxSubmissionAttempts;
+			const nextRunAt = shouldRetry ? new Date(completedAt.getTime() + Math.min(60, 2 ** nextAttempts) * 60 * 1000) : completedAt;
+			const status = result.ok ? "success" : shouldRetry ? "queued" : "failed";
 
 			await Promise.all([
-				db.insert(submissions).values(
-					batch.map((job) => ({
-						siteId: job.siteId,
-						loc: job.loc,
-						engine: job.engine,
-						status,
-						responseMessage,
-						attempt: job.attempts + 1,
-					})),
-				),
-				db
-					.update(submissionJobs)
-					.set({
-						status,
-						attempts: sql`${submissionJobs.attempts} + 1`,
-						lockedAt: null,
-						lastErrorMessage: result.ok ? null : responseMessage,
-						updatedAt: completedAt,
-					})
-					.where(
-						inArray(
-							submissionJobs.id,
-							batch.map((job) => job.id),
-						),
-					),
-				db
-					.update(urls)
-					.set({
-						lastSubmittedAt: completedAt,
-						lastSubmissionStatus: status,
-					})
-					.where(and(eq(urls.siteId, batch[0].siteId), inArray(urls.loc, batchUrlList))),
+				db.insert(submissions).values(batch.map((job) => ({
+					siteId: job.siteId, loc: job.loc, engine: job.engine, status: result.ok ? "success" : "failed",
+					responseMessage, attempt: job.attempts + 1,
+				}))),
+				db.update(submissionJobs).set({
+					status, attempts: sql`${submissionJobs.attempts} + 1`,
+					nextRunAt, lockedAt: null, lastErrorMessage: result.ok ? null : responseMessage, updatedAt: completedAt,
+				}).where(and(eq(submissionJobs.status, "processing"), inArray(submissionJobs.id, batch.map((job) => job.id)))),
+				db.update(urls).set({
+					lastSubmittedAt: completedAt, lastSubmissionStatus: result.ok ? "success" : "failed",
+				}).where(and(eq(urls.siteId, batch[0].siteId), inArray(urls.loc, batchUrlList))),
 			]);
 
 			if (result.ok) {
 				successCount += batch.length;
+			} else if (shouldRetry) {
+				retriedCount += batch.length;
 			} else {
 				failedCount += batch.length;
 				await db.insert(alerts).values({
-					siteId: batch[0].siteId,
-					title: "Submission Failed",
-					message: `${batch[0].engine} submission failed for ${batch.length} URL(s): ${responseMessage}`,
-					alertType: "error_detected",
-					resolved: false,
+					siteId: batch[0].siteId, title: "Submission Failed",
+					message: `${batch[0].engine} submission exhausted retries for ${batch.length} URL(s): ${responseMessage}`,
+					alertType: "error_detected", resolved: false,
 				});
 			}
 		}
 	}
 
-	return { processedCount: jobs.length, successCount, failedCount };
+	return { processedCount: jobs.length, successCount, failedCount, retriedCount };
 }
 
 export async function runScheduledAutomation() {
 	const cutoff = new Date(Date.now() - 60 * 60 * 1000);
-	const dueRows = await db
-		.select({ siteId: sites.id })
-		.from(siteSitemaps)
-		.innerJoin(sites, eq(siteSitemaps.siteId, sites.id))
-		.where(
-			and(
-				eq(sites.automationEnabled, true),
-				eq(sites.verified, true),
-				eq(siteSitemaps.status, "active"),
-				or(isNull(siteSitemaps.lastSyncAt), lte(siteSitemaps.lastSyncAt, cutoff)),
-			),
-		)
-		.orderBy(siteSitemaps.lastSyncAt)
-		.limit(AUTOMATION_LIMITS.maxSitesPerRun);
+	const dueRows = await db.select({ siteId: sites.id }).from(siteSitemaps).innerJoin(sites, eq(siteSitemaps.id, siteSitemaps.id)).where(and(
+		eq(sites.automationEnabled, true), eq(sites.verified, true), eq(siteSitemaps.status, "active"),
+		or(isNull(siteSitemaps.lastSyncAt), lte(siteSitemaps.lastSyncAt, cutoff)),
+	)).orderBy(siteSitemaps.lastSyncAt).limit(AUTOMATION_LIMITS.maxSitesPerRun);
 	const siteIds = Array.from(new Set(dueRows.map((row) => row.siteId)));
 	const syncResults = [];
-
 	for (const siteId of siteIds) {
 		const [site] = await db.select().from(sites).where(eq(sites.id, siteId)).limit(1);
-		if (!site) {
-			continue;
-		}
-
+		if (!site) continue;
 		syncResults.push(await syncActiveSitemaps(site).catch((error) => ({ success: false, failures: [getErrorMessage(error)] })));
 	}
-
 	const submissionsResult = await processSubmissionQueue();
-	return {
-		syncedSites: siteIds.length,
-		syncResults,
-		submissions: submissionsResult,
-	};
+	return { syncedSites: siteIds.length, syncResults, submissions: submissionsResult };
 }
 
 export async function getSiteSettings(userId: string, siteId: string) {
 	const site = await getSiteForUser(siteId, userId);
-	if (!site) {
-		return null;
-	}
+	if (!site) return null;
 
 	const [sitemapSources, indexNow, bing, bingSiteInt, googleSiteInt] = await Promise.all([
-		db
-			.select()
-			.from(siteSitemaps)
-			.where(eq(siteSitemaps.siteId, siteId))
-			.orderBy(desc(siteSitemaps.isPrimary), desc(siteSitemaps.createdAt)),
+		db.select().from(siteSitemaps).where(eq(siteSitemaps.siteId, siteId)).orderBy(desc(siteSitemaps.isPrimary), desc(siteSitemaps.createdAt)),
 		getIndexNowSettings(site),
-		db
-			.select()
-			.from(userIntegrations)
-			.where(and(eq(userIntegrations.userId, userId), eq(userIntegrations.provider, "bing")))
-			.limit(1),
-		db
-			.select()
-			.from(siteIntegrations)
-			.where(and(eq(siteIntegrations.siteId, siteId), eq(siteIntegrations.provider, "bing")))
-			.limit(1)
-			.then(([row]) => row || null),
-		db
-			.select()
-			.from(siteIntegrations)
-			.where(and(eq(siteIntegrations.siteId, siteId), eq(siteIntegrations.provider, "google")))
-			.limit(1)
-			.then(([row]) => row || null),
+		db.select().from(userIntegrations).where(and(eq(userIntegrations.userId, userId), eq(userIntegrations.provider, "bing"))).limit(1),
+		db.select().from(siteIntegrations).where(and(eq(siteIntegrations.siteId, siteId), eq(siteIntegrations.provider, "bing"))).limit(1).then(([row]) => row || null),
+		db.select().from(siteIntegrations).where(and(eq(siteIntegrations.siteId, siteId), eq(siteIntegrations.provider, "google"))).limit(1).then(([row]) => row || null),
 	]);
 	const [bingIntegration] = bing;
 	let bingKey: string | null = null;
 	let bingErrorMessage = bingIntegration?.lastErrorMessage ?? null;
 	if (bingIntegration) {
-		try {
-			bingKey = await readStoredSecret(bingIntegration.encryptedSecret);
-		} catch (error) {
-			bingErrorMessage = `Unable to decrypt Bing key: ${getErrorMessage(error)}`;
-		}
+		try { bingKey = await readStoredSecret(bingIntegration.encryptedSecret); }
+		catch (error) { bingErrorMessage = `Unable to decrypt Bing key: ${getErrorMessage(error)}`; }
 	}
-
 	return {
-		site,
-		sitemapSources,
-		indexNow,
-		bing: bingIntegration
-			? {
-					status: bingIntegration.status,
-					maskedKey: bingKey ? maskCredential(bingKey) : null,
-					verifiedAt: bingIntegration.verifiedAt,
-					lastCheckedAt: bingIntegration.lastCheckedAt,
-					lastErrorMessage: bingErrorMessage,
-					automationEnabled: bingSiteInt ? bingSiteInt.automationEnabled : true,
-				}
-			: null,
-		google: {
-			automationEnabled: googleSiteInt ? googleSiteInt.automationEnabled : false,
-		},
+		site, sitemapSources, indexNow,
+		bing: bingIntegration ? {
+			status: bingIntegration.status, maskedKey: bingKey ? maskCredential(bingKey) : null,
+			verifiedAt: bingIntegration.verifiedAt, lastCheckedAt: bingIntegration.lastCheckedAt,
+			lastErrorMessage: bingErrorMessage, automationEnabled: bingSiteInt ? bingSiteInt.automationEnabled : true,
+		} : null,
+		google: { automationEnabled: googleSiteInt ? googleSiteInt.automationEnabled : false },
 	};
 }
 
 export async function updateEngineAutomationForUser(userId: string, siteId: string, provider: string, enabled: boolean) {
 	const site = await getSiteForUser(siteId, userId);
-	if (!site) {
-		throw new Error("Site not found");
-	}
+	if (!site) throw new Error("Site not found");
 
 	if (provider === "indexnow" && enabled) {
-		const [indexNow] = await db
-			.select()
-			.from(siteIntegrations)
-			.where(and(eq(siteIntegrations.siteId, siteId), eq(siteIntegrations.provider, "indexnow")))
-			.limit(1);
-		if (!indexNow || indexNow.status !== "verified") {
-			throw new Error("Verify the IndexNow key before enabling automation.");
-		}
+		const [indexNow] = await db.select().from(siteIntegrations).where(and(eq(siteIntegrations.siteId, siteId), eq(siteIntegrations.provider, "indexnow"))).limit(1);
+		if (!indexNow || indexNow.status !== "verified") throw new Error("Verify the IndexNow key before enabling automation.");
 	}
-
 	if (provider === "bing" && enabled) {
-		const [bingUserInt] = await db
-			.select()
-			.from(userIntegrations)
-			.where(and(eq(userIntegrations.userId, userId), eq(userIntegrations.provider, "bing")))
-			.limit(1);
-		if (!bingUserInt || bingUserInt.status !== "verified") {
-			throw new Error("Verify the Bing Webmaster API key in user settings first.");
-		}
+		const [bingUserInt] = await db.select().from(userIntegrations).where(and(eq(userIntegrations.userId, userId), eq(userIntegrations.provider, "bing"))).limit(1);
+		if (!bingUserInt || bingUserInt.status !== "verified") throw new Error("Verify the Bing Webmaster API key in user settings first.");
 	}
-
 	const now = new Date();
-	await db
-		.insert(siteIntegrations)
-		.values({
-			siteId,
-			provider,
-			status: provider === "indexnow" ? "pending" : "verified",
-			automationEnabled: enabled,
-			createdAt: now,
-			updatedAt: now,
-		})
-		.onConflictDoUpdate({
-			target: [siteIntegrations.siteId, siteIntegrations.provider],
-			set: {
-				automationEnabled: enabled,
-				updatedAt: now,
-			},
-		});
+	await db.insert(siteIntegrations).values({
+		siteId, provider, status: provider === "indexnow" ? "pending" : "verified",
+		automationEnabled: enabled, createdAt: now, updatedAt: now,
+	}).onConflictDoUpdate({ target: [siteIntegrations.siteId, siteIntegrations.provider], set: { automationEnabled: enabled, updatedAt: now } });
 }
 
-export async function updateUrlSubmissionRulesForUser(
-	userId: string,
-	siteId: string,
-	submitNewUrls: boolean,
-	submitChangedUrls: boolean
-) {
+export async function updateUrlSubmissionRulesForUser(userId: string, siteId: string, submitNewUrls: boolean, submitChangedUrls: boolean) {
 	const site = await getSiteForUser(siteId, userId);
-	if (!site) {
-		throw new Error("Site not found");
-	}
-
+	if (!site) throw new Error("Site not found");
 	const integration = await ensureIndexNowIntegration(site);
 	const config = readPublicConfig(integration.publicConfig);
-	const updatedConfig = {
-		...config,
-		submitNewUrls,
-		submitChangedUrls,
-	};
-
-	await db
-		.update(siteIntegrations)
-		.set({
-			publicConfig: updatedConfig,
-			updatedAt: new Date(),
-		})
-		.where(eq(siteIntegrations.id, integration.id));
+	await db.update(siteIntegrations).set({
+		publicConfig: { ...config, submitNewUrls, submitChangedUrls }, updatedAt: new Date(),
+	}).where(eq(siteIntegrations.id, integration.id));
 }
 
 export async function deleteSiteForUser(userId: string, siteId: string) {
 	const site = await getSiteForUser(siteId, userId);
-	if (!site) {
-		throw new Error("Site not found");
-	}
-
+	if (!site) throw new Error("Site not found");
 	await db.delete(sites).where(eq(sites.id, siteId));
 }
