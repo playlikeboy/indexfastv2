@@ -657,7 +657,7 @@ export async function processSubmissionQueue(options: { siteId?: string; maxJobs
 
 export async function runScheduledAutomation() {
 	const cutoff = new Date(Date.now() - 60 * 60 * 1000);
-	const dueRows = await db.select({ siteId: sites.id }).from(siteSitemaps).innerJoin(sites, eq(siteSitemaps.id, siteSitemaps.id)).where(and(
+	const dueRows = await db.select({ siteId: sites.id }).from(siteSitemaps).innerJoin(sites, eq(siteSitemaps.siteId, sites.id)).where(and(
 		eq(sites.automationEnabled, true), eq(sites.verified, true), eq(siteSitemaps.status, "active"),
 		or(isNull(siteSitemaps.lastSyncAt), lte(siteSitemaps.lastSyncAt, cutoff)),
 	)).orderBy(siteSitemaps.lastSyncAt).limit(AUTOMATION_LIMITS.maxSitesPerRun);
